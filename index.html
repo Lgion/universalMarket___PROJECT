@@ -9,6 +9,8 @@
 </head>
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="avatar.js"></script>
+    <script src="cart.js"></script>
     <script>
         let scene, camera, renderer;
         let playerGroup;
@@ -17,6 +19,7 @@
         let currentRotation = 0;
         let targetRotation = 0;
         let isRotating = false;
+        let isWalking = false;
 
         function init() {
             // Scène de base
@@ -55,68 +58,13 @@
             playerGroup = new THREE.Group();
 
             // Avatar (représenté par un cylindre simple)
-            const avatarGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.6, 8);
-            const avatarMaterial = new THREE.MeshPhongMaterial({ color: 0x2194ce });
-            const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
-            avatar.position.y = 1.2;
+            const avatar = new Avatar();
             playerGroup.add(avatar);
-
-            // Caddie
-            const cartGroup = new THREE.Group();
-            cartGroup.position.set(0, 0.4, 1); // Plus en arrière par rapport à l'avatar
-
-            // Corps du caddie (plus grand)
-            const cartBasketGeometry = new THREE.BoxGeometry(1.2, 0.8, 1.5);
-            const cartMaterial = new THREE.MeshPhongMaterial({ 
-                color: 0x888888,
-                metalness: 0.5,
-                roughness: 0.5
-            });
-            const cartBasket = new THREE.Mesh(cartBasketGeometry, cartMaterial);
-            cartGroup.add(cartBasket);
-
-            // Roues du caddie (plus grandes)
-            const wheelGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.1, 8);
-            const wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
-
-            // Position des roues
-            const wheelPositions = [
-                [-0.5, -0.4, 0.6],  // avant gauche
-                [0.5, -0.4, 0.6],   // avant droite
-                [-0.5, -0.4, -0.6], // arrière gauche
-                [0.5, -0.4, -0.6]   // arrière droite
-            ];
-
-            wheelPositions.forEach(position => {
-                const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
-                wheel.rotation.x = Math.PI / 2;
-                wheel.position.set(...position);
-                cartGroup.add(wheel);
-            });
-
-            // Poignée du caddie (plus grande)
-            const handleGeometry = new THREE.CylinderGeometry(0.08, 0.08, 1.1, 8);
-            const handle = new THREE.Mesh(handleGeometry, cartMaterial);
-            handle.position.set(0, 0.5, -0.7);
-            handle.rotation.x = Math.PI / 2;
-            cartGroup.add(handle);
-
-            // Ajouter des barres latérales pour plus de détail
-            const sideBarGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8);
-            const leftBar = new THREE.Mesh(sideBarGeometry, cartMaterial);
-            const rightBar = new THREE.Mesh(sideBarGeometry, cartMaterial);
-
-            leftBar.position.set(-0.5, 0.2, 0);
-            rightBar.position.set(0.5, 0.2, 0);
-            leftBar.rotation.z = Math.PI / 2;
-            rightBar.rotation.z = Math.PI / 2;
-
-            cartGroup.add(leftBar);
-            cartGroup.add(rightBar);
-
-            playerGroup.add(cartGroup);
-            playerGroup.position.set(0, 0, 0);
             scene.add(playerGroup);
+
+            const cart = new ShoppingCart();
+            cart.position.z = 0.7; // Positionner le caddie derrière l'avatar
+            playerGroup.add(cart);
 
             // Rayons (têtes de gondole)
             const aisleGeometry = new THREE.BoxGeometry(3, 4, 2);
@@ -137,6 +85,8 @@
                 rightAisle.position.set(8, 2, z);
                 scene.add(rightAisle);
             }
+
+            playerGroup.rotation.y = Math.PI; // Oriente l'ensemble vers le fond du magasin
         }
 
         function animate() {
@@ -178,25 +128,25 @@
             switch(event.key) {
                 case 'ArrowUp':
                 case 'z':
-                    // Avancer uniquement sur l'axe Z
-                    playerGroup.position.z -= moveSpeed;
-                    camera.position.z -= moveSpeed;
+                    isWalking = true;
+                    playerGroup.position.z -= moveSpeed; // Avance vers le fond (-Z)
+                    updateCameraPosition();
                     break;
                 case 'ArrowDown':
                 case 's':
-                    // Reculer uniquement sur l'axe Z
-                    playerGroup.position.z += moveSpeed;
-                    camera.position.z += moveSpeed;
+                    isWalking = true;
+                    playerGroup.position.z += moveSpeed; // Recule vers l'avant (+Z)
+                    updateCameraPosition();
                     break;
                 case 'ArrowLeft':
                 case 'q':
-                    // Rotation limitée à -90 degrés
+                    // Rotation de la tête vers la gauche
                     isRotating = true;
                     targetRotation = Math.PI / 2;
                     break;
                 case 'ArrowRight':
                 case 'd':
-                    // Rotation limitée à 90 degrés
+                    // Rotation de la tête vers la droite
                     isRotating = true;
                     targetRotation = -Math.PI / 2;
                     break;
