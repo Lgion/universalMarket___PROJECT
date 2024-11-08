@@ -12,6 +12,11 @@
     <script>
         let scene, camera, renderer;
         let playerGroup;
+        let rotationSpeed = 0.1;
+        let moveSpeed = 0.2;
+        let currentRotation = 0;
+        let targetRotation = 0;
+        let isRotating = false;
 
         function init() {
             // Scène de base
@@ -20,8 +25,8 @@
             
             // Caméra
             camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, 2); // Position légèrement au-dessus et derrière l'avatar
-            camera.lookAt(0, 0, -5); // Regarde devant
+            camera.position.set(0, 15, 8); // Plus haute et plus en arrière
+            camera.lookAt(0, 0, -5);
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -48,17 +53,69 @@
 
             // Groupe pour l'avatar et le caddie
             playerGroup = new THREE.Group();
-            
-            // Avatar (représenté par un sprite)
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load('supermarket atlas.png', (texture) => {
-                const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-                const sprite = new THREE.Sprite(spriteMaterial);
-                sprite.scale.set(2, 2, 1);
-                playerGroup.add(sprite);
+
+            // Avatar (représenté par un cylindre simple)
+            const avatarGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.6, 8);
+            const avatarMaterial = new THREE.MeshPhongMaterial({ color: 0x2194ce });
+            const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
+            avatar.position.y = 1.2;
+            playerGroup.add(avatar);
+
+            // Caddie
+            const cartGroup = new THREE.Group();
+            cartGroup.position.set(0, 0.4, 1); // Plus en arrière par rapport à l'avatar
+
+            // Corps du caddie (plus grand)
+            const cartBasketGeometry = new THREE.BoxGeometry(1.2, 0.8, 1.5);
+            const cartMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x888888,
+                metalness: 0.5,
+                roughness: 0.5
+            });
+            const cartBasket = new THREE.Mesh(cartBasketGeometry, cartMaterial);
+            cartGroup.add(cartBasket);
+
+            // Roues du caddie (plus grandes)
+            const wheelGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.1, 8);
+            const wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+
+            // Position des roues
+            const wheelPositions = [
+                [-0.5, -0.4, 0.6],  // avant gauche
+                [0.5, -0.4, 0.6],   // avant droite
+                [-0.5, -0.4, -0.6], // arrière gauche
+                [0.5, -0.4, -0.6]   // arrière droite
+            ];
+
+            wheelPositions.forEach(position => {
+                const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                wheel.rotation.x = Math.PI / 2;
+                wheel.position.set(...position);
+                cartGroup.add(wheel);
             });
 
-            playerGroup.position.set(0, 0.1, 0); // Légèrement au-dessus du sol
+            // Poignée du caddie (plus grande)
+            const handleGeometry = new THREE.CylinderGeometry(0.08, 0.08, 1.1, 8);
+            const handle = new THREE.Mesh(handleGeometry, cartMaterial);
+            handle.position.set(0, 0.5, -0.7);
+            handle.rotation.x = Math.PI / 2;
+            cartGroup.add(handle);
+
+            // Ajouter des barres latérales pour plus de détail
+            const sideBarGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8);
+            const leftBar = new THREE.Mesh(sideBarGeometry, cartMaterial);
+            const rightBar = new THREE.Mesh(sideBarGeometry, cartMaterial);
+
+            leftBar.position.set(-0.5, 0.2, 0);
+            rightBar.position.set(0.5, 0.2, 0);
+            leftBar.rotation.z = Math.PI / 2;
+            rightBar.rotation.z = Math.PI / 2;
+
+            cartGroup.add(leftBar);
+            cartGroup.add(rightBar);
+
+            playerGroup.add(cartGroup);
+            playerGroup.position.set(0, 0, 0);
             scene.add(playerGroup);
 
             // Rayons (têtes de gondole)
@@ -84,39 +141,74 @@
 
         function animate() {
             requestAnimationFrame(animate);
+
+            if (isRotating) {
+                // Animation douce de la rotation
+                const rotationDiff = targetRotation - currentRotation;
+                if (Math.abs(rotationDiff) > 0.01) {
+                    currentRotation += rotationDiff * 0.1;
+                    playerGroup.rotation.y = currentRotation;
+                    
+                    // Mise à jour de la caméra
+                    const cameraDistance = 8;
+                    const cameraHeight = 15;
+                    const lookAheadDistance = 5;
+
+                    camera.position.x = playerGroup.position.x;
+                    camera.position.z = playerGroup.position.z + cameraDistance;
+                    camera.position.y = cameraHeight;
+
+                    const lookAtPoint = new THREE.Vector3(
+                        playerGroup.position.x - Math.sin(currentRotation) * lookAheadDistance,
+                        0,
+                        playerGroup.position.z - Math.cos(currentRotation) * lookAheadDistance
+                    );
+                    camera.lookAt(lookAtPoint);
+                } else {
+                    isRotating = false;
+                    currentRotation = targetRotation;
+                }
+            }
+
             renderer.render(scene, camera);
         }
 
         // Contrôles basiques
         document.addEventListener('keydown', (event) => {
-            const speed = 0.5;
             switch(event.key) {
                 case 'ArrowUp':
                 case 'z':
-                    playerGroup.position.z -= speed;
-                    camera.position.z -= speed;
+                    // Avancer uniquement sur l'axe Z
+                    playerGroup.position.z -= moveSpeed;
+                    camera.position.z -= moveSpeed;
                     break;
                 case 'ArrowDown':
                 case 's':
-                    playerGroup.position.z += speed;
-                    camera.position.z += speed;
+                    // Reculer uniquement sur l'axe Z
+                    playerGroup.position.z += moveSpeed;
+                    camera.position.z += moveSpeed;
                     break;
                 case 'ArrowLeft':
                 case 'q':
-                    if (playerGroup.position.x > -6) {
-                        playerGroup.position.x -= speed;
-                        camera.position.x -= speed;
-                    }
+                    // Rotation limitée à -90 degrés
+                    isRotating = true;
+                    targetRotation = Math.PI / 2;
                     break;
                 case 'ArrowRight':
                 case 'd':
-                    if (playerGroup.position.x < 6) {
-                        playerGroup.position.x += speed;
-                        camera.position.x += speed;
-                    }
+                    // Rotation limitée à 90 degrés
+                    isRotating = true;
+                    targetRotation = -Math.PI / 2;
                     break;
             }
-            camera.lookAt(playerGroup.position.x, 0, playerGroup.position.z - 5);
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (['ArrowLeft', 'ArrowRight', 'q', 'd'].includes(event.key)) {
+                // Retour à la position centrale quand on relâche
+                isRotating = true;
+                targetRotation = 0;
+            }
         });
 
         // Gestion du redimensionnement
