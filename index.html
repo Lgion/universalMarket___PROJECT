@@ -27,9 +27,9 @@
             scene.background = new THREE.Color(0xf0f0f0);
             
             // Caméra
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 15, 8); // Plus haute et plus en arrière
-            camera.lookAt(0, 0, -5);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 0); // Hauteur moyenne d'un humain
+            camera.lookAt(0, 1.6, -5);
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -99,19 +99,15 @@
                     currentRotation += rotationDiff * 0.1;
                     playerGroup.rotation.y = currentRotation;
                     
-                    // Mise à jour de la caméra
-                    const cameraDistance = 8;
-                    const cameraHeight = 15;
-                    const lookAheadDistance = 5;
-
+                    // Mise à jour de la caméra pour la vue FPS
                     camera.position.x = playerGroup.position.x;
-                    camera.position.z = playerGroup.position.z + cameraDistance;
-                    camera.position.y = cameraHeight;
+                    camera.position.z = playerGroup.position.z;
+                    camera.position.y = 1.6; // Hauteur des yeux
 
                     const lookAtPoint = new THREE.Vector3(
-                        playerGroup.position.x - Math.sin(currentRotation) * lookAheadDistance,
-                        0,
-                        playerGroup.position.z - Math.cos(currentRotation) * lookAheadDistance
+                        playerGroup.position.x - Math.sin(currentRotation) * 5,
+                        1.6,
+                        playerGroup.position.z - Math.cos(currentRotation) * 5
                     );
                     camera.lookAt(lookAtPoint);
                 } else {
