@@ -20,6 +20,9 @@
         let targetRotation = 0;
         let isRotating = false;
         let isWalking = false;
+        let cameraVerticalAngle = 0;
+        const maxLookDownAngle = Math.PI / 4; // 45 degrés vers le bas
+        const minLookDownAngle = 0;
 
         function init() {
             // Scène de base
@@ -28,7 +31,7 @@
             
             // Caméra
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 1.6, 0); // Hauteur moyenne d'un humain
+            camera.position.set(0, 1.8, 0.3); // Augmentation de la hauteur et léger recul
             camera.lookAt(0, 1.6, -5);
 
             // Renderer
@@ -37,11 +40,11 @@
             document.body.appendChild(renderer.domElement);
 
             // Éclairage
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 20, 10);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            directionalLight.position.set(0, 10, 0);
             scene.add(directionalLight);
 
             // Sol
@@ -60,17 +63,22 @@
             // Avatar (représenté par un cylindre simple)
             const avatar = new Avatar();
             playerGroup.add(avatar);
-            scene.add(playerGroup);
 
+            // Ajout du caddie avec un décalage et une rotation correcte
             const cart = new ShoppingCart();
-            cart.position.z = 0.7; // Positionner le caddie derrière l'avatar
+            cart.position.z = -0.7; // Position devant l'avatar
+            cart.position.y = 0.0; // Assurez-vous que le caddie est au sol
+            cart.rotation.y = 0; // Pas de rotation initiale
             playerGroup.add(cart);
+
+            scene.add(playerGroup);
 
             // Rayons (têtes de gondole)
             const aisleGeometry = new THREE.BoxGeometry(3, 4, 2);
             const aisleMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x666666,
-                roughness: 0.7
+                roughness: 0.7,
+                metalness: 0.1
             });
 
             // Création des rayons de chaque côté
@@ -97,17 +105,17 @@
                 const rotationDiff = targetRotation - currentRotation;
                 if (Math.abs(rotationDiff) > 0.01) {
                     currentRotation += rotationDiff * 0.1;
-                    playerGroup.rotation.y = currentRotation;
+                    playerGroup.rotation.y = currentRotation + Math.PI;
                     
                     // Mise à jour de la caméra pour la vue FPS
                     camera.position.x = playerGroup.position.x;
-                    camera.position.z = playerGroup.position.z;
-                    camera.position.y = 1.6; // Hauteur des yeux
+                    camera.position.z = playerGroup.position.z + 0.3; // Léger recul de la caméra
+                    camera.position.y = 1.8; // Hauteur augmentée
 
                     const lookAtPoint = new THREE.Vector3(
-                        playerGroup.position.x - Math.sin(currentRotation) * 5,
+                        playerGroup.position.x - Math.sin(currentRotation + Math.PI) * 5,
                         1.6,
-                        playerGroup.position.z - Math.cos(currentRotation) * 5
+                        playerGroup.position.z - Math.cos(currentRotation + Math.PI) * 5
                     );
                     camera.lookAt(lookAtPoint);
                 } else {
@@ -119,30 +127,53 @@
             renderer.render(scene, camera);
         }
 
+        function updateCameraPosition() {
+            camera.position.x = playerGroup.position.x;
+            camera.position.z = playerGroup.position.z + 0.3;
+            camera.position.y = 1.8;
+
+            const lookAtPoint = new THREE.Vector3(
+                playerGroup.position.x - Math.sin(currentRotation + Math.PI) * 5,
+                1.6 - Math.tan(cameraVerticalAngle) * 5,
+                playerGroup.position.z - Math.cos(currentRotation + Math.PI) * 5
+            );
+            camera.lookAt(lookAtPoint);
+        }
+
         // Contrôles basiques
         document.addEventListener('keydown', (event) => {
             switch(event.key) {
                 case 'ArrowUp':
                 case 'z':
-                    isWalking = true;
-                    playerGroup.position.z -= moveSpeed; // Avance vers le fond (-Z)
-                    updateCameraPosition();
+                    if (event.shiftKey) {
+                        // Relever la vue
+                        cameraVerticalAngle = Math.max(cameraVerticalAngle - 0.1, minLookDownAngle);
+                        updateCameraPosition();
+                    } else {
+                        isWalking = true;
+                        playerGroup.position.z -= moveSpeed;
+                        updateCameraPosition();
+                    }
                     break;
                 case 'ArrowDown':
                 case 's':
-                    isWalking = true;
-                    playerGroup.position.z += moveSpeed; // Recule vers l'avant (+Z)
-                    updateCameraPosition();
+                    if (event.shiftKey) {
+                        // Baisser la vue vers le caddie
+                        cameraVerticalAngle = Math.min(cameraVerticalAngle + 0.1, maxLookDownAngle);
+                        updateCameraPosition();
+                    } else {
+                        isWalking = true;
+                        playerGroup.position.z += moveSpeed;
+                        updateCameraPosition();
+                    }
                     break;
                 case 'ArrowLeft':
                 case 'q':
-                    // Rotation de la tête vers la gauche
                     isRotating = true;
                     targetRotation = Math.PI / 2;
                     break;
                 case 'ArrowRight':
                 case 'd':
-                    // Rotation de la tête vers la droite
                     isRotating = true;
                     targetRotation = -Math.PI / 2;
                     break;
@@ -150,8 +181,11 @@
         });
 
         document.addEventListener('keyup', (event) => {
+            if (event.key === 'Shift') {
+                cameraVerticalAngle = 0;
+                updateCameraPosition();
+            }
             if (['ArrowLeft', 'ArrowRight', 'q', 'd'].includes(event.key)) {
-                // Retour à la position centrale quand on relâche
                 isRotating = true;
                 targetRotation = 0;
             }
