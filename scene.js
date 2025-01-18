@@ -6,7 +6,9 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 let scene, camera, renderer, controls;
 const loadingManager = new THREE.LoadingManager();
 const loader = new GLTFLoader(loadingManager);
-let cart, hands;
+let cart, hands, rightHand;
+let activeHand = 'left'; // Variable pour garder la main active
+let targetX = 0;  // Position cible pour controls.target.x
 
 // Gestionnaire de chargement
 const loadingElement = document.getElementById('loading');
@@ -20,10 +22,9 @@ function init() {
 
     // Configuration de la caméra
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // Positionner la caméra en arrière et légèrement en hauteur (environ 0.5m = 5 unités Three.js)
-    camera.position.set(0, 2, 5);
-    // Faire pointer la caméra légèrement vers le bas
-    camera.lookAt(0, 0.5, 0);
+    // Position de la caméra comme si c'était les yeux de l'utilisateur
+    camera.position.set(0, 10, -5);  // Plus haut et légèrement en arrière des mains
+    camera.lookAt(10, 0, -6);        // Regarder devant le caddie
 
     // Configuration du renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -38,14 +39,12 @@ function init() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    // Définir les limites de zoom
+    // Limiter les contrôles pour maintenir une vue réaliste
     controls.minDistance = 3;
     controls.maxDistance = 10;
-    // Limiter l'angle vertical pour garder une vue du dessus
-    controls.minPolarAngle = Math.PI / 6; // 30 degrés minimum depuis le haut
-    controls.maxPolarAngle = Math.PI / 2.5; // environ 72 degrés maximum
-    // Centrer les contrôles sur un point légèrement surélevé
-    controls.target.set(0, 0.5, 0);
+    controls.minPolarAngle = Math.PI / 6;    // Limite l'angle vertical minimum (vue du dessus)
+    controls.maxPolarAngle = Math.PI / 2.5;  // Limite l'angle vertical maximum
+    controls.target.set(0, 9.5, -4);           // Point de focus devant le caddie
 
     // Éclairage
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -57,7 +56,7 @@ function init() {
     scene.add(directionalLight);
 
     // Sol
-    const groundGeometry = new THREE.PlaneGeometry(10, 10);
+    const groundGeometry = new THREE.PlaneGeometry(10, 200);
     const groundMaterial = new THREE.MeshStandardMaterial({ 
         color: 0xcccccc,
         roughness: 0.8,
@@ -73,8 +72,8 @@ function init() {
         'assets/shopping_cart.glb',
         function (gltf) {
             cart = gltf.scene;
-            cart.position.set(0, 0, 0);
-            cart.scale.set(1, 1, 1);
+            cart.position.set(0, 1, 0);
+            cart.scale.set(1.5, 1.5, 1.5);
             cart.traverse((node) => {
                 if (node.isMesh) {
                     node.castShadow = true;
@@ -95,7 +94,7 @@ function init() {
                     cart.add(hands);
 
                     // Main droite (clone de la main gauche)
-                    const rightHand = hands.clone();
+                    rightHand = hands.clone();
                     rightHand.position.set(0.6, 2.5, -2.5);  // Ajusté pour la barre arrière
                     cart.add(rightHand);
 
@@ -123,33 +122,47 @@ function init() {
 
     // Ajout des contrôles de position pour les mains
     document.addEventListener('keydown', (event) => {
-        if (!hands) return;
+        if (!hands || !rightHand || !cart) return;
         
-        const step = 0.1;
+        const step = 1;
+        const handToMove = activeHand === 'left' ? hands : rightHand;
+
         switch(event.key) {
             case 'ArrowUp':
-                hands.position.y += step;
+                // Avancer l'ensemble
+                cart.position.z += step;  // Le caddie avance (Z négatif = avant)
+                camera.position.z += step;  // Le caddie avance (Z négatif = avant)
+                controls.target.z += step; 
                 break;
             case 'ArrowDown':
-                hands.position.y -= step;
+                // Reculer l'ensemble
+                cart.position.z -= step;  // Le caddie recule (Z positif = arrière)
+                camera.position.z -= step;  // Le caddie avance (Z négatif = avant)
+                controls.target.z -= step; 
                 break;
             case 'ArrowLeft':
-                hands.position.x -= step;
+                targetX = 8;  // Au lieu de définir directement controls.target.x
+                controls.target.y = 0;
                 break;
             case 'ArrowRight':
-                hands.position.x += step;
+                targetX = -8;  // Au lieu de définir directement controls.target.x
+                controls.target.y = 0;
+                break;
+            case ' ':
+                targetX = 0;  // Réinitialiser la rotation
+                controls.target.y = 9.5;  // Hauteur par défaut
                 break;
             case 'PageUp':
-                hands.position.z -= step;
+                handToMove.position.z -= step;
                 break;
             case 'PageDown':
-                hands.position.z += step;
+                handToMove.position.z += step;
                 break;
             case 'r':
-                hands.rotation.y += step;
+                handToMove.rotation.y += step;
                 break;
             case 'f':
-                hands.rotation.y -= step;
+                handToMove.rotation.y -= step;
                 break;
         }
     });
@@ -166,6 +179,11 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate);
+
+    // Interpolation fluide de la rotation
+    const rotationSpeed = 0.05;  // Vitesse de rotation (ajustez selon vos préférences)
+    controls.target.x += (targetX - controls.target.x) * rotationSpeed;
+
     controls.update();
     renderer.render(scene, camera);
 }
