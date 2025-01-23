@@ -270,6 +270,127 @@ function init() {
         createCeilingLight(7, z);
     }
 
+    // Fonction pour créer une bouteille d'eau 1.5L
+    function createWaterBottle() {
+        const bottleGroup = new THREE.Group();
+
+        // Corps de la bouteille
+        const bodyGeometry = new THREE.CylinderGeometry(0.4, 0.4, 2, 16);
+        const bottleMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x87CEEB,
+            transparent: true,
+            opacity: 0.6,
+            roughness: 0.2,
+            metalness: 0.1
+        });
+        const body = new THREE.Mesh(bodyGeometry, bottleMaterial);
+        bottleGroup.add(body);
+
+        // Goulot de la bouteille
+        const neckGeometry = new THREE.CylinderGeometry(0.15, 0.2, 0.3, 16);
+        const neck = new THREE.Mesh(neckGeometry, bottleMaterial);
+        neck.position.y = 1.1;
+        bottleGroup.add(neck);
+
+        // Bouchon
+        const capGeometry = new THREE.CylinderGeometry(0.18, 0.18, 0.2, 16);
+        const capMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x0000FF,
+            roughness: 0.5
+        });
+        const cap = new THREE.Mesh(capGeometry, capMaterial);
+        cap.position.y = 1.35;
+        bottleGroup.add(cap);
+
+        bottleGroup.castShadow = true;
+        bottleGroup.receiveShadow = true;
+        return bottleGroup;
+    }
+
+    // Création d'une étagère de supermarché
+    const shelfGeometry = new THREE.BoxGeometry(1, 2, 3);  // Profondeur, hauteur, largeur
+    const shelfMaterial = new THREE.MeshStandardMaterial({
+        color: 0x808080,  // Gris métallique
+        roughness: 0.5,
+        metalness: 0.7
+    });
+
+    // Fonction pour créer une unité d'étagère complète
+    function createShelfUnit(position) {
+        const shelfUnit = new THREE.Group();
+
+        // Structure principale (montant arrière)
+        const mainFrame = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 25, 10),
+            shelfMaterial
+        );
+        shelfUnit.add(mainFrame);
+
+        // Panneau latéral gauche
+        const leftPanel = new THREE.Mesh(
+            new THREE.BoxGeometry(8, 25, 0.1),
+            shelfMaterial
+        );
+        leftPanel.position.x = -0.4;
+        leftPanel.position.z = -5;
+        shelfUnit.add(leftPanel);
+
+        // Panneau latéral droit
+        const rightPanel = new THREE.Mesh(
+            new THREE.BoxGeometry(8, 25, 0.1),
+            shelfMaterial
+        );
+        rightPanel.position.x = -0.4;
+        rightPanel.position.z = 5;
+        shelfUnit.add(rightPanel);
+
+        // Ajouter 4 niveaux d'étagères avec des bouteilles
+        for (let i = 0; i < 4; i++) {
+            const shelf = new THREE.Mesh(
+                new THREE.BoxGeometry(8, 0.05, 10),
+                shelfMaterial
+            );
+            shelf.position.y = i * 4 - 0.75;
+            shelf.position.x = -0.4;
+            shelfUnit.add(shelf);
+
+            // Ajouter des bouteilles sur chaque étagère
+            const bottlesPerRow = 5;
+            const bottlesPerColumn = 3;
+            const spacing = 1.5;
+
+            for (let row = 0; row < bottlesPerRow; row++) {
+                for (let col = 0; col < bottlesPerColumn; col++) {
+                    const bottle = createWaterBottle();
+                    bottle.position.x = -3.5 + row * spacing;
+                    bottle.position.y = i * 4 + 0.3;  // Ajusté pour être sur l'étagère
+                    bottle.position.z = -3 + col * spacing;
+                    shelfUnit.add(bottle);
+                }
+            }
+        }
+
+        shelfUnit.position.copy(position);
+        shelfUnit.castShadow = true;
+        shelfUnit.receiveShadow = true;
+        return shelfUnit;
+    }
+
+    // Créer une rangée d'étagères le long de l'allée
+    const shelfSpacing = 12;  // Espace entre chaque unité d'étagère
+    const shelfStartZ = 5;     // Début des étagères
+    const numberOfShelves = 5; // Nombre d'unités d'étagères
+
+    for (let i = 0; i < numberOfShelves; i++) {
+        const shelfPosition = new THREE.Vector3(
+            15,  // Position X (côté gauche de l'allée)
+            1,   // Position Y (hauteur)
+            shelfStartZ + i * shelfSpacing  // Position Z (le long de l'allée)
+        );
+        const shelfUnit = createShelfUnit(shelfPosition);
+        scene.add(shelfUnit);
+    }
+
     // Chargement du modèle GLTF du caddie
     loader.load(
         'assets/shopping_cart.glb',
