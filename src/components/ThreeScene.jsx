@@ -8,7 +8,7 @@ import Gondola from "./Gondola";
 // Constantes de dimensions (adaptées du JS original)
 const AISLE_WIDTH = 6;
 const SHELF_DEPTH = 1;
-const GONDOLA_HEIGHT = 2;
+const GONDOLA_HEIGHT = 4;
 const GONDOLA_LENGTH = 5;
 const GONDOLA_SPACING = .5;
 const AD_WIDTH = 2.5;
@@ -152,6 +152,10 @@ function SupermarcheScene({ setInfo, categories }) {
       <CeilingLights length={floorLength} />
       {/* Gondoles, Ads, Comptoirs hôtesses */}
       {categories.map((category, index) => {
+        // Largeur dynamique de la gondole en fonction du nombre de sous-catégories
+        const SUBCATEGORY_WIDTH = 1; // Largeur d'une colonne de sous-catégorie
+        const sousCategories = category.sousCategories || category.subcategories || [];
+        const gondolaWidth = (sousCategories.length || 1) * SUBCATEGORY_WIDTH;
         const gondolaPos = [
           -(AISLE_WIDTH / 2 + SHELF_DEPTH / 2),
           GONDOLA_HEIGHT / 2,
@@ -170,12 +174,20 @@ function SupermarcheScene({ setInfo, categories }) {
         const ad = adsData[index];
         const elts = [
           <Gondola
-            key={`gondola-${category.id}`}
+            key={category.categorie || category.name || index}
             position={gondolaPos}
-            color={category.color}
-            label={category.name}
-            onClick={() => setInfo({ type: "gondola", data: category })}
-          />
+            color={category.color || '#ccc'}
+            label={category.categorie || category.name}
+            width={gondolaWidth}
+            subcategories={sousCategories}
+          />,
+          // <Gondola
+          //   key={`gondola-${category.id}`}
+          //   position={gondolaPos}
+          //   color={category.color}
+          //   label={category.name}
+          //   onClick={() => setInfo({ type: "gondola", data: category })}
+          // />
         ];
         if (ad) {
           elts.push(
