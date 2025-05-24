@@ -1,0 +1,25 @@
+{
+  "categorie": "Friandises",
+  "sousCategories": [
+    {
+      "nom": "Chocolats",
+      "produits": [
+        {"id": 1, "nom": "Tablette de chocolat", "prix": 1.8, "description": "Chocolat noir 100g", "image": ""},
+        {"id": 2, "nom": "Bonbons assortis", "prix": 2.2, "description": "Sachet 200g", "image": ""}
+      ]
+    },
+    {
+      "nom": "Biscuits",
+      "produits": [
+        {"id": 3, "nom": "Petit beurre", "prix": 1.1, "description": "Paquet 150g", "image": ""},
+        {"id": 4, "nom": "Cookies", "prix": 2.0, "description": "Cookies aux pépites de chocolat 180g", "image": ""}
+      ]
+    },
+    {
+      "nom": "Sucettes",
+      "produits": [
+        {"id": 5, "nom": "Sucette fruitée", "prix": 0.5, "description": "Sucette goût fruit", "image": ""}
+      ]
+    }
+  ]
+}

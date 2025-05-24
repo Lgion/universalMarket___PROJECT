@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarché E-commerce 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; overflow: hidden; background-color: #f0f0f0; }
+        #header {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            background-color: rgba(0, 51, 102, 0.9);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            height: 60px; /* Hauteur fixe */
+        }
+        #header h1 { font-size: 1.5em; margin: 0; }
+        #nav-links a, #header-actions button {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            background-color: rgba(255,255,255,0.2);
+            transition: background-color 0.3s;
+        }
+        #nav-links a:hover, #header-actions button:hover {
+            background-color: rgba(255,255,255,0.4);
+        }
+        #search-bar {
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+            margin-left: 15px;
+        }
+        #threejs-container {
+            position: absolute;
+            top: 80px; /* Espace pour le header */
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 80px); /* Hauteur restante */
+            overflow: hidden;
+        }
+        #info-panel {
+            position: absolute;
+            top: 80px; /* Sous le header */
+            right: -400px; /* Caché par défaut */
+            width: 380px;
+            height: calc(100vh - 100px); /* Hauteur restante moins un peu de marge */
+            background-color: rgba(255, 255, 255, 0.95);
+            border-left: 1px solid #ccc;
+            padding: 20px;
+            overflow-y: auto;
+            transition: right 0.5s ease-in-out;
+            z-index: 5;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        }
+        #info-panel.visible {
+            right: 0;
+        }
+        #info-panel h2 { margin-top: 0; color: #003366; }
+        #info-panel .subcategory-list, #info-panel .product-list {
+            list-style: none; padding: 0; margin-top: 10px;
+        }
+        #info-panel .subcategory-list li, #info-panel .product-list li {
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        #info-panel .subcategory-list li:hover, #info-panel .product-list li:hover {
+            background-color: #e0e0e0;
+        }
+        #info-panel .product-details {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        #info-panel .product-details img { max-width: 100px; float: left; margin-right: 10px;}
+        #info-panel .product-details button {
+            background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; margin-top:10px;
+        }
+        #info-panel .product-details button:hover { background-color: #218838; }
+
+        #cart-modal {
+            display: none; /* Caché par défaut */
+            position: fixed;
+            z-index: 20;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        #cart-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            border-radius: 8px;
+        }
+        #cart-content h2 { color: #003366; }
+        #cart-items-list { list-style-type: none; padding: 0; }
+        #cart-items-list li { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;}
+        #cart-items-list li:last-child { border-bottom: none; }
+        .close-cart { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-cart:hover, .close-cart:focus { color: black; text-decoration: none; }
+        #cart-total { font-weight: bold; text-align: right; margin-top: 20px; font-size: 1.2em;}
+        #checkout-button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em; display: block; margin: 20px auto 0;}
+        #checkout-button:hover { background-color: #0056b3; }
+
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>Supermarché 3D</h1>
+        <div id="nav-links">
+            <!-- Les liens de navigation vers les gondoles seront générés par JS -->
+        </div>
+        <div>
+            <input type="text" id="search-bar" placeholder="Rechercher un produit...">
+            <button id="view-cart-btn">Caddie (<span id="cart-count">0</span>)</button>
+            <button id="checkout-header-btn">Caisse</button>
+            <button id="options-btn">Options</button>
+        </div>
+    </div>
+
+    <div id="threejs-container"></div>
+
+    <div id="info-panel">
+        <h2 id="info-panel-title">Détails</h2>
+        <div id="info-panel-content">
+            <p>Sélectionnez un élément pour voir les détails.</p>
+        </div>
+    </div>
+
+    <div id="cart-modal">
+        <div id="cart-content">
+            <span class="close-cart" onclick="document.getElementById('cart-modal').style.display='none'">&times;</span>
+            <h2>Votre Caddie</h2>
+            <ul id="cart-items-list">
+                <!-- Les articles du caddie seront listés ici -->
+            </ul>
+            <div id="cart-total">Total: 0.00 €</div>
+            <button id="checkout-button" onclick="alert('Passage à la caisse non implémenté.')">Passer à la caisse</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA (normally in JSON files) ---
+        const categoriesData = [
+            {
+                id: "boissons",
+                name: "Boissons",
+                color: 0x007bff, // Blue
+                texture: null, // Path to texture or Data URL
+                subcategories: [
+                    { name: "Sodas", products: [
+                        { id: "soda001", name: "Cola Classic", price: 1.50, image: "https://via.placeholder.com/100x100/FF0000/FFFFFF?Text=Cola", description: "Bouteille de Cola Classic 1.5L." },
+                        { id: "soda002", name: "Limonade Citron", price: 1.20, image: "https://via.placeholder.com/100x100/FFFF00/000000?Text=Limonade", description: "Limonade artisanale au citron." }
+                    ]},
+                    { name: "Jus de fruits", products: [
+                        { id: "jus001", name: "Jus d'Orange Pur", price: 2.50, image: "https://via.placeholder.com/100x100/FFA500/FFFFFF?Text=JusOrange", description: "1L de pur jus d'orange sans sucres ajoutés." },
+                        { id: "jus002", name: "Jus de Pomme Bio", price: 2.80, image: "https://via.placeholder.com/100x100/90EE90/000000?Text=JusPomme", description: "Jus de pomme bio pressé à froid." }
+                    ]},
+                    { name: "Eaux", products: [
+                        { id: "eau001", name: "Eau de Source Plate", price: 0.50, image: "https://via.placeholder.com/100x100/ADD8E6/000000?Text=EauPlate", description: "Pack de 6 bouteilles d'eau de source." }
+                    ]}
+                ]
+            },
+            {
+                id: "viandes",
+                name: "Viandes",
+                color: 0xdc3545, // Red
+                texture: null,
+                subcategories: [
+                    { name: "Boeuf", products: [
+                        { id: "boeuf001", name: "Steak Haché 5% MG", price: 4.50, image: "https://via.placeholder.com/100x100/A52A2A/FFFFFF?Text=Steak", description: "Barquette de 2 steaks hachés de boeuf." },
+                        { id: "boeuf002", name: "Entrecôte (250g)", price: 8.90, image: "https://via.placeholder.com/100x100/800000/FFFFFF?Text=Entrecote", description: "Belle entrecôte de boeuf à griller." }
+                    ]},
+                    { name: "Volaille", products: [
+                        { id: "volaille001", name: "Poulet Fermier Entier", price: 12.00, image: "https://via.placeholder.com/100x100/F5F5DC/000000?Text=Poulet", description: "Poulet fermier label rouge, prêt à cuire." }
+                    ]}
+                ]
+            },
+            {
+                id: "boulangerie_patisserie",
+                name: "Boulangerie / Pâtisserie",
+                color: 0xffc107, // Yellow
+                texture: null,
+                subcategories: [
+                    { name: "Pains", products: [
+                        { id: "pain001", name: "Baguette Tradition", price: 1.10, image: "https://via.placeholder.com/100x100/F5DEB3/000000?Text=Baguette", description: "Baguette de pain frais du jour." }
+                    ]},
+                    { name: "Viennoiseries", products: [
+                        { id: "vien001", name: "Croissant au Beurre", price: 1.00, image: "https://via.placeholder.com/100x100/FFE4B5/000000?Text=Croissant", description: "Croissant pur beurre." }
+                    ]}
+                ]
+            },
+            {
+                id: "cuisine",
+                name: "Produits de Cuisine",
+                color: 0x28a745, // Green
+                texture: null,
+                subcategories: [
+                    { name: "Épices et Condiments", products: [
+                        { id: "epi001", name: "Sel de Guérande", price: 2.00, image: "https://via.placeholder.com/100x100/D3D3D3/000000?Text=Sel", description: "Sachet de sel de Guérande." },
+                        { id: "epi002", name: "Huile d'Olive Vierge", price: 5.50, image: "https://via.placeholder.com/100x100/808000/FFFFFF?Text=Huile", description: "Bouteille d'huile d'olive extra vierge." }
+                    ]},
+                    { name: "Conserves", products: [
+                        { id: "cons001", name: "Tomates Pelées Bio", price: 1.80, image: "https://via.placeholder.com/100x100/FF6347/FFFFFF?Text=Tomates", description: "Conserve de tomates pelées bio." }
+                    ]}
+                ]
+            },
+            {
+                id: "friandises",
+                name: "Friandises",
+                color: 0x6f42c1, // Purple
+                texture: null,
+                subcategories: [
+                    { name: "Chocolats", products: [
+                        { id: "choc001", name: "Tablette Chocolat Noir 70%", price: 2.20, image: "https://via.placeholder.com/100x100/4A2511/FFFFFF?Text=Chocolat", description: "Tablette de chocolat noir intense." }
+                    ]},
+                    { name: "Bonbons", products: [
+                        { id: "bon001", name: "Sachet Bonbons Acidulés", price: 3.00, image: "https://via.placeholder.com/100x100/FFC0CB/000000?Text=Bonbons", description: "Assortiment de bonbons acidulés." }
+                    ]}
+                ]
+            }
+        ];
+
+        const adsData = [
+            { id: "ad001", name: "Promo Cola", image: "https://via.placeholder.com/300x400/FF0000/FFFFFF?Text=Super+Promo+COLA", link: "#promo-cola", description: "Profitez de -20% sur tous les Colas cette semaine !" },
+            { id: "ad002", name: "Jeu Concours", image: "https://via.placeholder.com/300x400/00FF00/000000?Text=Grand+Jeu+Concours", link: "#jeu-concours", description: "Tentez de gagner un an de courses gratuites !" },
+            { id: "ad003", name: "Nouveauté Bio", image: "https://via.placeholder.com/300x400/0000FF/FFFFFF?Text=Nouveau+BIO", link: "#nouveau-bio", description: "Découvrez notre nouvelle gamme de produits bio." },
+            { id: "ad004", name: "Fidélité Récompensée", image: "https://via.placeholder.com/300x400/FFFF00/000000?Text=Carte+Fidelite", link: "#fidelite", description: "Votre fidélité est récompensée ! Plus d'infos en magasin."},
+            { id: "ad005", name: "Recette du Jour", image: "https://via.placeholder.com/300x400/FF00FF/FFFFFF?Text=Recette+Facile", link: "#recette", description: "Inspirez-vous avec notre recette facile de la semaine." }
+        ];
+
+        // --- THREE.JS SETUP ---
+        let scene, camera, renderer;
+        let player, playerVelocity;
+        let targetRotationY = 0;
+        let currentViewRotationY = 0;
+        const rotationAngle = Math.PI / 180 * 70; // 70 degrees
+        const gondolaObjects = []; // Pour le raycasting
+        const adObjects = [];
+        const hostessObjects = [];
+        const allInteractableObjects = [];
+
+        const AISLE_WIDTH = 1;
+        const SHELF_DEPTH = 0.5; // Profondeur de la gondole / distance allée-mur
+        const GONDOLA_HEIGHT = 2.5;
+        const GONDOLA_LENGTH = 4; // Longueur d'une section de gondole
+        const GONDOLA_SPACING = 0.5; // Espace entre les gondoles
+        const AD_WIDTH = 1.5;
+        const AD_HEIGHT = 2;
+        const HOSTESS_COUNTER_WIDTH = 1;
+        const HOSTESS_COUNTER_HEIGHT = 1.2;
+        const HOSTESS_COUNTER_DEPTH = 0.4;
+
+        let cart = [];
+
+        // --- DOM Elements ---
+        const infoPanel = document.getElementById('info-panel');
+        const infoPanelTitle = document.getElementById('info-panel-title');
+        const infoPanelContent = document.getElementById('info-panel-content');
+        const headerNavLinks = document.getElementById('nav-links');
+        const cartCountSpan = document.getElementById('cart-count');
+        const cartModal = document.getElementById('cart-modal');
+        const cartItemsList = document.getElementById('cart-items-list');
+        const cartTotalSpan = document.getElementById('cart-total');
+
+        function init3D() {
+            const container = document.getElementById('threejs-container');
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb); // Sky blue background
+            scene.fog = new THREE.Fog(0x87ceeb, 10, 50);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 1.6, 5); // Position initiale (hauteur d'yeux, un peu en arrière pour voir le début)
+            
+            // Player object (invisible, for position and collision)
+            player = new THREE.Object3D();
+            player.add(camera); // Attach camera to player
+            scene.add(player);
+            player.position.set(0, 0, 5); // Player's base is on the floor
+            camera.position.set(0, 1.6, 0); // Camera relative to player
+
+            playerVelocity = new THREE.Vector3();
+
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            createEnvironment();
+            populateHeaderNav();
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('wheel', onMouseWheel, { passive: false });
+            container.addEventListener('click', onCanvasClick);
+            document.getElementById('view-cart-btn').addEventListener('click', toggleCartModal);
+            document.getElementById('checkout-header-btn').addEventListener('click', () => alert('Passage à la caisse non implémenté.'));
+            document.getElementById('options-btn').addEventListener('click', () => alert('Options non implémentées.'));
+
+            animate();
+        }
+
+        function createEnvironment() {
+            // Floor
+            const floorLength = (GONDOLA_LENGTH + GONDOLA_SPACING) * categoriesData.length + 10; // Longueur totale de l'allée + marges
+            const floorGeometry = new THREE.PlaneGeometry(AISLE_WIDTH + SHELF_DEPTH * 2, floorLength);
+            const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = 0;
+            floor.position.z = -floorLength / 2 + 5; // Centrer par rapport à la caméra initiale
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Walls (simplified: gondolas act as walls)
+            // Left Wall (behind gondolas)
+            const wallLeftGeometry = new THREE.BoxGeometry(0.1, GONDOLA_HEIGHT + 1, floorLength);
+            const wallMaterial = new THREE.MeshStandardMaterial({color: 0xd0d0d0});
+            const wallLeft = new THREE.Mesh(wallLeftGeometry, wallMaterial);
+            wallLeft.position.set(-(AISLE_WIDTH/2 + SHELF_DEPTH + 0.05), (GONDOLA_HEIGHT+1)/2, floor.position.z);
+            scene.add(wallLeft);
+
+            // Right Wall (behind ads/hostesses)
+            const wallRight = new THREE.Mesh(wallLeftGeometry, wallMaterial);
+            wallRight.position.set((AISLE_WIDTH/2 + SHELF_DEPTH + 0.05), (GONDOLA_HEIGHT+1)/2, floor.position.z);
+            scene.add(wallRight);
+
+
+            let currentZ = 0; // Start at Z=0 for first gondola
+
+            categoriesData.forEach((category, index) => {
+                // Gondola (Left Side)
+                const gondolaGeometry = new THREE.BoxGeometry(SHELF_DEPTH, GONDOLA_HEIGHT, GONDOLA_LENGTH);
+                const gondolaMaterial = new THREE.MeshStandardMaterial({ color: category.color || 0xaaaaaa });
+                const gondola = new THREE.Mesh(gondolaGeometry, gondolaMaterial);
+                gondola.position.set(-(AISLE_WIDTH / 2 + SHELF_DEPTH / 2), GONDOLA_HEIGHT / 2, currentZ - GONDOLA_LENGTH / 2);
+                gondola.castShadow = true;
+                gondola.receiveShadow = true;
+                gondola.userData = { type: 'gondola', data: category, name: `Gondole ${category.name}` };
+                scene.add(gondola);
+                gondolaObjects.push(gondola);
+                allInteractableObjects.push(gondola);
+
+                // Ad Panel (Right Side, opposite gondola)
+                if (index < adsData.length) { // Make sure we have an ad
+                    const ad = adsData[index];
+                    const adGeometry = new THREE.PlaneGeometry(AD_WIDTH, AD_HEIGHT);
+                    // For simplicity, use colored planes for ads if no texture path
+                    const adMaterial = new THREE.MeshStandardMaterial({ color: new THREE.Color(Math.random() * 0xffffff), side:THREE.DoubleSide });
+                    const adPanel = new THREE.Mesh(adGeometry, adMaterial);
+                    adPanel.position.set(AISLE_WIDTH / 2 + 0.05, GONDOLA_HEIGHT / 2, currentZ - GONDOLA_LENGTH / 2); // Slightly off the wall, aligned with gondola center
+                    adPanel.rotation.y = -Math.PI / 2; // Face towards aisle
+                    adPanel.userData = { type: 'ad', data: ad, name: `Publicité: ${ad.name}` };
+                    scene.add(adPanel);
+                    adObjects.push(adPanel);
+                    allInteractableObjects.push(adPanel);
+                }
+
+                // Hostess Counter (Right Side, at intersection/end of gondola)
+                if (index < categoriesData.length) { // One hostess counter per category intersection
+                    const hostessGeometry = new THREE.BoxGeometry(HOSTESS_COUNTER_DEPTH, HOSTESS_COUNTER_HEIGHT, HOSTESS_COUNTER_WIDTH);
+                    const hostessMaterial = new THREE.MeshStandardMaterial({ color: 0x6c757d }); // Grey
+                    const hostessCounter = new THREE.Mesh(hostessGeometry, hostessMaterial);
+                    // Position at the end of the current gondola section, on the right
+                    hostessCounter.position.set(AISLE_WIDTH / 2 + SHELF_DEPTH / 2, HOSTESS_COUNTER_HEIGHT / 2, currentZ - GONDOLA_LENGTH - GONDOLA_SPACING / 2);
+                    hostessCounter.castShadow = true;
+                    hostessCounter.userData = { type: 'hostess', name: `Comptoir Hôtesse ${index + 1}`, data: {
+                        options: [
+                            { name: "Offres Spéciales", action: () => alert("Découvrez nos offres spéciales du jour !")},
+                            { name: "Jeux à Gratter", action: () => alert("Tentez votre chance avec nos jeux à gratter !")},
+                            { name: "Loterie", action: () => alert("Participez à notre grande loterie !")},
+                            { name: "Passer à la caisse", action: () => { toggleCartModal(); alert("Veuillez vérifier votre caddie avant de finaliser."); }}
+                        ]
+                    }};
+                    scene.add(hostessCounter);
+                    hostessObjects.push(hostessCounter);
+                    allInteractableObjects.push(hostessCounter);
+                }
+                currentZ -= (GONDOLA_LENGTH + GONDOLA_SPACING);
+            });
+        }
+        
+        function populateHeaderNav() {
+            categoriesData.forEach((category, index) => {
+                const link = document.createElement('a');
+                link.href = `#${category.id}`;
+                link.textContent = category.name;
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Calculate Z position of the gondola
+                    const targetZ = -index * (GONDOLA_LENGTH + GONDOLA_SPACING) - GONDOLA_LENGTH / 2;
+                    player.position.z = targetZ; // Move player to the gondola
+                    targetRotationY = 0; // Face forward
+                    hideInfoPanel();
+                });
+                headerNavLinks.appendChild(link);
+            });
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('threejs-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function onKeyDown(event) {
+            const moveSpeed = 0.2;
+            switch (event.code) {
+                case 'ArrowUp':
+                case 'KeyW':
+                    playerVelocity.z = -moveSpeed;
+                    break;
+                case 'ArrowDown':
+                case 'KeyS':
+                    playerVelocity.z = moveSpeed;
+                    break;
+                case 'ArrowLeft':
+                case 'KeyA':
+                    targetRotationY = -rotationAngle; // Turn left
+                    showInfoPanelForSide('left');
+                    break;
+                case 'ArrowRight':
+                case 'KeyD':
+                    targetRotationY = rotationAngle; // Turn right
+                    showInfoPanelForSide('right');
+                    break;
+                case 'Space':
+                    targetRotationY = 0; // Center view
+                    hideInfoPanel();
+                    break;
+            }
+        }
+        
+        function onMouseWheel(event) {
+            event.preventDefault(); // Prevent page scrolling
+            const moveSpeed = 0.3;
+            player.position.z += Math.sign(event.deltaY) * moveSpeed;
+            // Add boundary checks if needed
+        }
+
+        function onCanvasClick(event) {
+            const container = document.getElementById('threejs-container');
+            const rect = container.getBoundingClientRect();
+            const mouse = new THREE.Vector2();
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects(allInteractableObjects);
+
+            if (intersects.length > 0) {
+                const firstIntersected = intersects[0].object;
+                const objectData = firstIntersected.userData;
+                
+                if (objectData.type === 'gondola') {
+                    targetRotationY = -rotationAngle; // Look left
+                    displayGondolaInfo(objectData.data);
+                } else if (objectData.type === 'ad') {
+                    targetRotationY = rotationAngle; // Look right
+                    displayAdInfo(objectData.data);
+                } else if (objectData.type === 'hostess') {
+                    targetRotationY = rotationAngle; // Look right
+                    displayHostessInfo(objectData);
+                }
+            }
+        }
+
+        function showInfoPanelForSide(side) {
+            // This function could try to find the closest object on that side
+            // For now, it's a placeholder if arrow keys are used without a click
+            // A more sophisticated approach would involve raycasting from camera center
+            // in the direction of the turn.
+            infoPanelTitle.textContent = "Information";
+            infoPanelContent.innerHTML = `<p>Vue tournée vers ${side === 'left' ? 'la gauche' : 'la droite'}. Cliquez sur un élément pour plus de détails.</p>`;
+            infoPanel.classList.add('visible');
+        }
+
+        function displayGondolaInfo(gondolaData) {
+            infoPanelTitle.textContent = `Rayon: ${gondolaData.name}`;
+            let contentHtml = '<h3>Sous-catégories:</h3><ul class="subcategory-list">';
+            gondolaData.subcategories.forEach(subcat => {
+                contentHtml += `<li data-category="${gondolaData.id}" data-subcategory="${subcat.name}">${subcat.name}</li>`;
+            });
+            contentHtml += '</ul><div id="product-listing"></div>';
+            infoPanelContent.innerHTML = contentHtml;
+
+            infoPanelContent.querySelectorAll('.subcategory-list li').forEach(li => {
+                li.addEventListener('click', (e) => {
+                    const subcatName = e.target.dataset.subcategory;
+                    const selectedSubcategory = gondolaData.subcategories.find(sc => sc.name === subcatName);
+                    displayProductList(selectedSubcategory.products);
+                });
+            });
+            infoPanel.classList.add('visible');
+        }
+
+        function displayProductList(products) {
+            const productListingDiv = document.getElementById('product-listing');
+            if (!productListingDiv) return;
+
+            let productsHtml = '<h3>Produits:</h3><ul class="product-list">';
+            products.forEach(product => {
+                productsHtml += `<li data-product-id="${product.id}">${product.name} - ${product.price.toFixed(2)} €</li>`;
+            });
+            productsHtml += '</ul><div id="selected-product-details"></div>';
+            productListingDiv.innerHTML = productsHtml;
+
+            productListingDiv.querySelectorAll('.product-list li').forEach(li => {
+                li.addEventListener('click', (e) => {
+                    const productId = e.target.dataset.productId;
+                    // Find product in the original full dataset (categoriesData)
+                    let P=null;
+                    for(const cat of categoriesData){
+                        for(const subcat of cat.subcategories){
+                            P = subcat.products.find(p=> p.id === productId);
+                            if(P) break;
+                        }
+                        if(P) break;
+                    }
+                    if (P) displayProductDetails(P);
+                });
+            });
+        }
+        
+        function displayProductDetails(product) {
+            const detailsDiv = document.getElementById('selected-product-details');
+            if (!detailsDiv) return;
+            
+            let detailsHtml = `<div class="product-details">
+                <h4>${product.name}</h4>
+                <img src="${product.image || 'https://via.placeholder.com/100x100/CCCCCC/000000?Text=Produit'}" alt="${product.name}">
+                <p>${product.description}</p>
+                <p><strong>Prix: ${product.price.toFixed(2)} €</strong></p>
+                <button onclick="addToCart('${product.id}', '${product.name}', ${product.price})">Ajouter au Caddie</button>
+            </div>`;
+            detailsDiv.innerHTML = detailsHtml;
+        }
+
+        function displayAdInfo(adData) {
+            infoPanelTitle.textContent = `Publicité: ${adData.name}`;
+            infoPanelContent.innerHTML = `
+                <img src="${adData.image || 'https://via.placeholder.com/300x200/CCCCCC/000000?Text=Pub'}" alt="${adData.name}" style="width:100%; max-width:300px;">
+                <p>${adData.description || 'Information publicitaire.'}</p>
+                <a href="${adData.link || '#'}" target="_blank" class="promo-link">Voir l'offre</a>
+            `;
+            infoPanel.classList.add('visible');
+        }
+
+        function displayHostessInfo(hostessObjectData) {
+            infoPanelTitle.textContent = hostessObjectData.name;
+            let contentHtml = '<h4>Services disponibles:</h4><ul>';
+            hostessObjectData.data.options.forEach(option => {
+                contentHtml += `<li><button class="hostess-option-btn" data-action="${option.name}">${option.name}</button></li>`;
+            });
+            contentHtml += '</ul>';
+            infoPanelContent.innerHTML = contentHtml;
+
+            infoPanelContent.querySelectorAll('.hostess-option-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const actionName = e.target.dataset.action;
+                    const selectedOption = hostessObjectData.data.options.find(opt => opt.name === actionName);
+                    if (selectedOption && selectedOption.action) {
+                        selectedOption.action();
+                    }
+                });
+            });
+            infoPanel.classList.add('visible');
+        }
+
+        function hideInfoPanel() {
+            infoPanel.classList.remove('visible');
+        }
+
+        // --- Cart Functionality ---
+        function addToCart(id, name, price) {
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ id, name, price, quantity: 1 });
+            }
+            updateCartDisplay();
+            alert(`${name} ajouté au caddie !`);
+        }
+
+        function updateCartDisplay() {
+            cartCountSpan.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartItemsList.innerHTML = ''; // Clear previous items
+            let total = 0;
+            cart.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${item.name} (x${item.quantity}) - ${(item.price * item.quantity).toFixed(2)} €`;
+                // Add remove button or quantity adjustment if needed
+                cartItemsList.appendChild(listItem);
+                total += item.price * item.quantity;
+            });
+            cartTotalSpan.textContent = `Total: ${total.toFixed(2)} €`;
+        }
+
+        function toggleCartModal() {
+            if (cartModal.style.display === "block") {
+                cartModal.style.display = "none";
+            } else {
+                updateCartDisplay(); // Ensure cart is up-to-date when shown
+                cartModal.style.display = "block";
+            }
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth camera rotation
+            if (camera.rotation.y !== targetRotationY) {
+                camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotationY, 0.1);
+                if (Math.abs(camera.rotation.y - targetRotationY) < 0.01) {
+                    camera.rotation.y = targetRotationY;
+                }
+            }
+            
+            // Player movement
+            if (playerVelocity.z !== 0) {
+                player.translateZ(playerVelocity.z);
+                playerVelocity.z *= 0.9; // Apply friction/damping
+                if (Math.abs(playerVelocity.z) < 0.001) playerVelocity.z = 0;
+            }
+
+            // Boundary check for player movement (simple Z axis)
+            const aisleTotalLength = (GONDOLA_LENGTH + GONDOLA_SPACING) * categoriesData.length;
+            if (player.position.z > 5) player.position.z = 5; // Start boundary
+            if (player.position.z < -(aisleTotalLength - GONDOLA_LENGTH/2 )) player.position.z = -(aisleTotalLength - GONDOLA_LENGTH/2);
+
+
+            renderer.render(scene, camera);
+        }
+
+        // --- Start Application ---
+        init3D();
+
+    </script>
+</body>
+</html>

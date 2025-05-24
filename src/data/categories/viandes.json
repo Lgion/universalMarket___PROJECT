@@ -1,0 +1,26 @@
+{
+  "categorie": "Viandes",
+  "sousCategories": [
+    {
+      "nom": "Boeuf",
+      "produits": [
+        {"id": 1, "nom": "Steak haché", "prix": 3.5, "description": "Steak haché pur boeuf 2x100g", "image": ""},
+        {"id": 2, "nom": "Côte de boeuf", "prix": 12.9, "description": "Côte de boeuf 400g", "image": ""}
+      ]
+    },
+    {
+      "nom": "Poulet",
+      "produits": [
+        {"id": 3, "nom": "Blanc de poulet", "prix": 4.2, "description": "Blanc de poulet 200g", "image": ""},
+        {"id": 4, "nom": "Cuisses de poulet", "prix": 3.8, "description": "Cuisses de poulet 400g", "image": ""}
+      ]
+    },
+    {
+      "nom": "Porc",
+      "produits": [
+        {"id": 5, "nom": "Côte de porc", "prix": 3.1, "description": "Côte de porc 200g", "image": ""},
+        {"id": 6, "nom": "Saucisse", "prix": 2.5, "description": "Saucisse de Toulouse 150g", "image": ""}
+      ]
+    }
+  ]
+}

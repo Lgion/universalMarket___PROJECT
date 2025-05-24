@@ -1,0 +1,26 @@
+{
+  "categorie": "Boulangerie/Pâtisserie",
+  "sousCategories": [
+    {
+      "nom": "Pains",
+      "produits": [
+        {"id": 1, "nom": "Baguette", "prix": 1.0, "description": "Baguette tradition", "image": ""},
+        {"id": 2, "nom": "Pain complet", "prix": 1.2, "description": "Pain complet 400g", "image": ""}
+      ]
+    },
+    {
+      "nom": "Viennoiseries",
+      "produits": [
+        {"id": 3, "nom": "Croissant", "prix": 0.9, "description": "Croissant pur beurre", "image": ""},
+        {"id": 4, "nom": "Pain au chocolat", "prix": 1.0, "description": "Pain au chocolat pur beurre", "image": ""}
+      ]
+    },
+    {
+      "nom": "Pâtisseries",
+      "produits": [
+        {"id": 5, "nom": "Éclair au chocolat", "prix": 2.0, "description": "Éclair au chocolat", "image": ""},
+        {"id": 6, "nom": "Tartelette aux fraises", "prix": 2.5, "description": "Tartelette aux fraises fraîches", "image": ""}
+      ]
+    }
+  ]
+}

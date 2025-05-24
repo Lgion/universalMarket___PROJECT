@@ -1,0 +1,26 @@
+{
+  "categorie": "Cuisine",
+  "sousCategories": [
+    {
+      "nom": "Épices",
+      "produits": [
+        {"id": 1, "nom": "Poivre noir", "prix": 1.3, "description": "Moulin de poivre noir 50g", "image": ""},
+        {"id": 2, "nom": "Paprika", "prix": 1.1, "description": "Paprika doux 40g", "image": ""}
+      ]
+    },
+    {
+      "nom": "Huiles",
+      "produits": [
+        {"id": 3, "nom": "Huile d'olive", "prix": 4.5, "description": "Bouteille 75cl", "image": ""},
+        {"id": 4, "nom": "Huile de tournesol", "prix": 2.8, "description": "Bouteille 1L", "image": ""}
+      ]
+    },
+    {
+      "nom": "Condiments",
+      "produits": [
+        {"id": 5, "nom": "Moutarde", "prix": 1.4, "description": "Pot de moutarde 200g", "image": ""},
+        {"id": 6, "nom": "Mayonnaise", "prix": 1.7, "description": "Tube de mayonnaise 175g", "image": ""}
+      ]
+    }
+  ]
+}

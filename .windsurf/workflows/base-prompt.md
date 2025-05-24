@@ -1,0 +1,13 @@
+---
+description: le prompt de base à toujours respecter
+---
+
+Crée une application de supermarché e-commerce. Utilise three.js et code l'application dans un seul fichier html. Il ne doit y avoir qu'une seul allée de rayon, avec à gauche les produits et à droite les publicités.
+L'allée fait 1metre de large, et de l'allée jusqu'au mur il y a 1/2metre à gauche et à droite. Les gondoles touchent presque l'allée.
+À gauche, les produits sont groupé en catégories (boissons, viandes, petit-déjeuner, produits ménagers, produits arômes et de cuisines, etc..).
+À droite, des pancartes publicitaires, et au niveau de l'intersection des gondoles (catégorie de produit) de gauche se situe à droite juste en face un comptoir avec une hôtesse permettant au clic d'accéder à divers produits alternatifs (jeux divers (à gratter, loterie, offre promotionnelle du jour, de passer à  la caisse pour règler, etc)), cliquer sur une pancarte publicitaire propose des liens promotionnels.
+Le caddie ne peut qu'avance ou reculer à l'aide du clavier et de la molette de la souris.
+Cliquer sur une gondole ou une pancarte publicitaire, ou utiliser les flèche gauche et droite du clavier, fait orienter la vue à 70° vers le côtedu clic. La touche espace permet de ramener la camera au centre. Lorsque la vue est orientée, un cadre apparaît à droite de l'écran affichant le produit ou la publicité sélectionné, avec plus de détails en dessous (comme une page web de détails d'un produit par exemple)
+Au dessus de l'interface graphique de l'allée il y a un header permettant de naviguer de gondole en gondole, de rechercher un produit, de visualiser l'ensemble des articles présents dans le caddie, de passer à la caisse, d'accéder à des options de comptes(langue,devise,etc)
+L'apparence et le fonctionnement interactif de chaque gondole est different, mais de nombreux points communs existent: les sous-catégories sont présentés en haut de la gondole (ex: catégorie: boisson, sous-catégories: alcool, gazeux, jus, eau, etc), et en dessous apparaît la liste des produits (ex pour boisson alcool, apparaîtra en dessous des choix comme: vodka, whiskey, tequila, etc), et en cliquant sur un des produits d'autres actions s'effectuent que je ne présente pas encore, mais permettra de choisir des caractéristiques comme: la marque, la taille, la quantité, etc)
+On va se restreindre à 5 catégories pour l'instant: viandes, boissons, boulangerie/pâtisserie, cuisine, et friandises. Je te laisse libre de générer les sous-catégories correspondantes. Crée un fichier json pour chaque categorie.s

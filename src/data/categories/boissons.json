@@ -1,0 +1,32 @@
+{
+  "categorie": "Boissons",
+  "sousCategories": [
+    {
+      "nom": "Alcool",
+      "produits": [
+        {"id": 1, "nom": "Vodka", "prix": 15.0, "description": "Vodka 70cl", "image": ""},
+        {"id": 2, "nom": "Whiskey", "prix": 22.0, "description": "Whiskey 70cl", "image": ""}
+      ]
+    },
+    {
+      "nom": "Gazeux",
+      "produits": [
+        {"id": 3, "nom": "Coca-Cola", "prix": 1.5, "description": "Bouteille 1L", "image": ""},
+        {"id": 4, "nom": "Fanta", "prix": 1.4, "description": "Bouteille 1L", "image": ""}
+      ]
+    },
+    {
+      "nom": "Jus",
+      "produits": [
+        {"id": 5, "nom": "Jus d'orange", "prix": 2.1, "description": "Brique 1L", "image": ""},
+        {"id": 6, "nom": "Jus de pomme", "prix": 2.0, "description": "Brique 1L", "image": ""}
+      ]
+    },
+    {
+      "nom": "Eau",
+      "produits": [
+        {"id": 7, "nom": "Eau minérale", "prix": 0.9, "description": "Bouteille 1.5L", "image": ""}
+      ]
+    }
+  ]
+}
