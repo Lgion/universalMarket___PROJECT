@@ -4,7 +4,12 @@
     {
       "nom": "Boeuf",
       "produits": [
-        {"id": 1, "nom": "Steak haché", "prix": 3.5, "description": "Steak haché pur boeuf 2x100g", "image": ""},
+        {"id": 1, "nom": "Steak haché", "prix": 3.5, "description": "Steak haché pur boeuf 2x100g", "image": "",
+ "personnalisation": [
+   {"type": "poids", "options": ["100g", "200g", "300g"]},
+   {"type": "parfum", "options": ["nature", "persil", "basilic"]}
+ ]
+},
         {"id": 2, "nom": "Côte de boeuf", "prix": 12.9, "description": "Côte de boeuf 400g", "image": ""}
       ]
     },

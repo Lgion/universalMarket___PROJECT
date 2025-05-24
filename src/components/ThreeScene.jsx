@@ -6,7 +6,7 @@ import { adsData } from "../data/ads";
 import Gondola from "./Gondola";
 
 // Constantes de dimensions (adaptées du JS original)
-const AISLE_WIDTH = 6;
+const AISLE_WIDTH = 10;
 const SHELF_DEPTH = 1;
 const GONDOLA_HEIGHT = 4;
 const GONDOLA_LENGTH = 5;

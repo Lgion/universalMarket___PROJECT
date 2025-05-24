@@ -3,30 +3,93 @@
   "sousCategories": [
     {
       "nom": "Alcool",
-      "produits": [
-        {"id": 1, "nom": "Vodka", "prix": 15.0, "description": "Vodka 70cl", "image": ""},
-        {"id": 2, "nom": "Whiskey", "prix": 22.0, "description": "Whiskey 70cl", "image": ""}
-      ]
+      "produits": {
+        "vodka": [
+          {"brand": null, "images": ["vodka.png", "vodka_ambiance.png"], "description": "Une vodka française de qualité.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "POLIAKOV", "description": "Une vodka française de qualité.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "ABSOLUT", "description": "La vodka suédoise iconique.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "Grey Goose", "description": "Vodka française premium, réputée pour sa pureté.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "Belvedere", "description": "Une vodka polonaise de luxe, distillée à partir de seigle.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "Smirnoff", "description": "La vodka la plus vendue au monde, d'origine russe.", "formats": [[0.33, 8.0], [1, 19.0]]}
+        ],
+        "whisky": [
+          {"brand": null, "images": ["whisky.png", "whisky_ambiance.png"], "description": "Un whisky écossais raffiné.", "formats": [[0.7, 22.0], [1, 32.0]]},
+          {"brand": "Jack Daniel's", "description": "Le célèbre Tennessee Whiskey américain.", "formats": [[0.7, 24.0], [1, 34.0]]},
+          {"brand": "Jameson", "description": "Le whiskey irlandais le plus vendu.", "formats": [[0.7, 21.0], [1, 29.0]]},
+          {"brand": "Chivas Regal", "description": "Blended Scotch Whisky de luxe.", "formats": [[0.7, 32.0], [1, 44.0]]},
+          {"brand": "Ballantine's", "description": "Un blend écossais très populaire.", "formats": [[0.7, 18.0], [1, 25.0]]}
+        ],
+        "rhum": [
+          {"brand": null, "images": ["rhum.png", "rhum_ambiance.png"], "description": "Un rhum ambré des Caraïbes.", "formats": [[0.7, 16.0], [1, 22.0]]},
+          {"brand": "Havana Club", "description": "Le rhum cubain iconique.", "formats": [[0.7, 17.0], [1, 23.0]]},
+          {"brand": "Bacardi", "description": "Rhum blanc léger et polyvalent.", "formats": [[0.7, 15.0], [1, 21.0]]},
+          {"brand": "Saint James", "description": "Rhum agricole de Martinique.", "formats": [[0.7, 18.0], [1, 24.0]]},
+          {"brand": "Diplomatico", "description": "Rhum vénézuélien doux et complexe.", "formats": [[0.7, 32.0], [1, 44.0]]}
+        ],
+        "gin": [
+          {"brand": null, "images": ["gin.png", "gin_ambiance.png"], "description": "Un gin londonien classique.", "formats": [[0.7, 19.0], [1, 27.0]]},
+          {"brand": "Bombay Sapphire", "description": "Gin anglais aux notes d'agrumes.", "formats": [[0.7, 21.0], [1, 29.0]]},
+          {"brand": "Gordon's", "description": "Le gin london dry le plus vendu.", "formats": [[0.7, 15.0], [1, 20.0]]},
+          {"brand": "Beefeater", "description": "Gin traditionnel de Londres.", "formats": [[0.7, 18.0], [1, 25.0]]},
+          {"brand": "Tanqueray", "description": "Gin premium très aromatique.", "formats": [[0.7, 22.0], [1, 30.0]]}
+        ],
+        "tequila": [
+          {"brand": null, "images": ["tequila.png", "tequila_ambiance.png"], "description": "Tequila 100% agave du Mexique.", "formats": [[0.7, 23.0], [1, 32.0]]},
+          {"brand": "Jose Cuervo", "description": "La tequila la plus populaire au monde.", "formats": [[0.7, 24.0], [1, 33.0]]},
+          {"brand": "Patrón", "description": "Tequila premium artisanale.", "formats": [[0.7, 38.0], [1, 52.0]]},
+          {"brand": "Don Julio", "description": "Tequila mexicaine haut de gamme.", "formats": [[0.7, 40.0], [1, 56.0]]},
+          {"brand": "Olmeca", "description": "Tequila douce et fruitée.", "formats": [[0.7, 20.0], [1, 28.0]]}
+        ]
+      }
     },
     {
-      "nom": "Gazeux",
-      "produits": [
-        {"id": 3, "nom": "Coca-Cola", "prix": 1.5, "description": "Bouteille 1L", "image": ""},
-        {"id": 4, "nom": "Fanta", "prix": 1.4, "description": "Bouteille 1L", "image": ""}
-      ]
+      "nom": "Gazeuse",
+      "produits": {
+        "coca-cola": [
+          {"brand": null, "images": ["coca.png", "coca_ambiance.png"], "description": "Boisson gazeuse rafraîchissante.", "formats": [[0.33, 1.2], [1, 2.5], [1.5, 3.2]]},
+          {"brand": "Coca-Cola", "description": "L'original, goût inimitable.", "formats": [[0.33, 1.2], [1, 2.5], [1.5, 3.2]]},
+          {"brand": "Coca-Cola Zero", "description": "Sans sucre, même plaisir.", "formats": [[0.33, 1.2], [1, 2.5]]}
+        ],
+        "fanta": [
+          {"brand": null, "images": ["fanta.png", "fanta_ambiance.png"], "description": "Boisson gazeuse à l'orange.", "formats": [[0.33, 1.1], [1, 2.2]]},
+          {"brand": "Fanta Orange", "description": "Goût orange fruité.", "formats": [[0.33, 1.1], [1, 2.2]]},
+          {"brand": "Fanta Citron", "description": "Goût citron acidulé.", "formats": [[0.33, 1.1], [1, 2.2]]}
+        ],
+        "oasis": [
+          {"brand": null, "images": ["oasis.png", "oasis_ambiance.png"], "description": "Boisson fruitée sans bulles.", "formats": [[0.33, 1.0], [1, 2.0]]},
+          {"brand": "Oasis Tropical", "description": "Mélange de fruits tropicaux.", "formats": [[0.33, 1.0], [1, 2.0]]}
+        ]
+      }
     },
     {
       "nom": "Jus",
-      "produits": [
-        {"id": 5, "nom": "Jus d'orange", "prix": 2.1, "description": "Brique 1L", "image": ""},
-        {"id": 6, "nom": "Jus de pomme", "prix": 2.0, "description": "Brique 1L", "image": ""}
-      ]
+      "produits": {
+        "jus-orange": [
+          {"brand": null, "images": ["jus_orange.png", "jus_orange_ambiance.png"], "description": "Jus d'orange 100% pur jus.", "formats": [[1, 2.0], [1.5, 2.8]]},
+          {"brand": "Tropicana", "description": "Jus d'orange sans pulpe.", "formats": [[1, 2.3], [1.5, 3.1]]},
+          {"brand": "Andros", "description": "Jus d'orange doux.", "formats": [[1, 2.1]]}
+        ],
+        "jus-pomme": [
+          {"brand": null, "images": ["jus_pomme.png", "jus_pomme_ambiance.png"], "description": "Jus de pomme frais.", "formats": [[1, 2.0], [1.5, 2.7]]},
+          {"brand": "Tropicana", "description": "Jus de pomme doux.", "formats": [[1, 2.2], [1.5, 3.0]]},
+          {"brand": "Andros", "description": "Jus de pomme artisanal.", "formats": [[1, 2.0]]}
+        ]
+      }
     },
     {
       "nom": "Eau",
-      "produits": [
-        {"id": 7, "nom": "Eau minérale", "prix": 0.9, "description": "Bouteille 1.5L", "image": ""}
-      ]
+      "produits": {
+        "eau-minerale": [
+          {"brand": null, "images": ["eau.png", "eau_ambiance.png"], "description": "Eau minérale naturelle.", "formats": [[0.5, 0.7], [1, 1.0], [1.5, 1.4]]},
+          {"brand": "Evian", "description": "Eau minérale pure des Alpes.", "formats": [[0.5, 0.9], [1, 1.3], [1.5, 1.7]]},
+          {"brand": "Volvic", "description": "Eau volcanique d'Auvergne.", "formats": [[0.5, 0.8], [1, 1.2], [1.5, 1.5]]}
+        ],
+        "eau-gazeuse": [
+          {"brand": null, "images": ["eau_gazeuse.png", "eau_gazeuse_ambiance.png"], "description": "Eau gazeuse rafraîchissante.", "formats": [[0.5, 0.8], [1, 1.1], [1.5, 1.6]]},
+          {"brand": "Perrier", "description": "Eau gazeuse pétillante.", "formats": [[0.5, 1.0], [1, 1.4], [1.5, 1.8]]},
+          {"brand": "San Pellegrino", "description": "Eau gazeuse italienne.", "formats": [[0.5, 1.1], [1, 1.5], [1.5, 2.0]]}
+        ]
+      }
     }
   ]
 }

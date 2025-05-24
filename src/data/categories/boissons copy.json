@@ -1,0 +1,40 @@
+{
+  "categorie": "Boissons",
+  "sousCategories": [
+    {
+      "nom": "Alcool",
+      "produits": {
+        "vodka": [
+          {"brand": "POLIAKOV", "description": "Une vodka française de qualité.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "ABSOLUT", "description": "La vodka suédoise iconique.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "Grey Goose", "description": "Vodka française premium, réputée pour sa pureté.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "Belvedere", "description": "Une vodka polonaise de luxe, distillée à partir de seigle.", "formats": [[0.33, 8.0], [1, 19.0]]},
+          {"brand": "Smirnoff", "description": "La vodka la plus vendue au monde, d'origine russe.", "formats": [[0.33, 8.0], [1, 19.0]]}
+        ]
+        // {"id": 2, "nom": "Whiskey", "prix": 22.0, "description": "Whiskey 70cl", "image": ""}
+      }
+    },
+    {
+      "nom": "Gazeux",
+      "produits": [
+        "@CocaCola33cl",
+        "@CocaCola1L",
+        "@Fanta33cl",
+        "@Fanta1L"
+      ]
+    },
+    {
+      "nom": "Jus",
+      "produits": [
+        "@JusOrange1L",
+        "@JusPomme1L"
+      ]
+    },
+    {
+      "nom": "Eau",
+      "produits": [
+        "@EauMinerale1_5L"
+      ]
+    }
+  ]
+}
