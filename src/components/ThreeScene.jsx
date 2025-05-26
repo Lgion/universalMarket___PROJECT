@@ -180,6 +180,7 @@ function SupermarcheScene({ setInfo, categories }) {
             label={category.categorie || category.name}
             width={gondolaWidth}
             subcategories={sousCategories}
+            {...(category.gondolaProps || {})}
           />,
           // <Gondola
           //   key={`gondola-${category.id}`}
@@ -274,25 +275,112 @@ function CameraController() {
 
 
 
+import CartModal from "./CartModal";
+import Header from "./Header";
+
 export default function ThreeScene({ setInfo }) {
   const [categories, setCategories] = useState(null);
   const [lookAt, setLookAt] = useState(null);
+  // Persistance du panier avec localStorage
+  const [cart, setCart] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cart');
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [openCart, setOpenCart] = useState(false);
 
   useEffect(() => {
     loadCategoriesData().then(setCategories);
   }, []);
 
+  // Sauvegarde le panier à chaque modification
+  useEffect(() => {
+    try {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    } catch (e) {}
+  }, [cart]);
+
+  // Fonction d'ajout au panier
+  const addToCart = ({ produit, brand, format }) => {
+    setCart(prev => {
+      // Cherche si l'article existe déjà (même produit, marque, format)
+      const idx = prev.findIndex(item =>
+        item.produit.label === produit.label &&
+        item.brand.bLabel === brand.bLabel &&
+        item.format.lFormat === format.lFormat
+      );
+      let newCart;
+      if (idx > -1) {
+        // Incrémente la quantité
+        newCart = prev.map((item, i) =>
+          i === idx ? { ...item, qty: (item.qty || 1) + 1 } : item
+        );
+      } else {
+        // Ajoute nouvel article
+        newCart = [...prev, { produit, brand, format, qty: 1 }];
+      }
+      console.log("Panier:", newCart.map(item => `${item.produit.label} - ${item.brand.bLabel} - ${item.format.lFormat}L - ${item.format.pPrix}€ x${item.qty || 1}`).join(" | "));
+      return newCart;
+    });
+  };
+
+  const removeFromCart = (index) => {
+    setCart(prev => {
+      const item = prev[index];
+      if (!item) return prev;
+      if ((item.qty || 1) > 1) {
+        return prev.map((it, i) => i === index ? { ...it, qty: it.qty - 1 } : it);
+      } else {
+        return prev.filter((_, i) => i !== index);
+      }
+    });
+  };
+
+  const clearCart = () => setCart([]);
+
+  // Calcule le total
+  const cartTotal = cart.reduce((sum, item) => sum + (parseFloat(item.format.pPrix) * (item.qty || 1)), 0);
+
+
   if (!categories) return <div className="threejs-container">Chargement des rayons...</div>;
 
+  // On injecte addToCart et openCart dans chaque gondole boissons
+  const categoriesWithCart = categories.map(cat => {
+    if (cat.id === "boissons") {
+      return {
+        ...cat,
+        gondolaProps: {
+          onAddToCart: addToCart
+        }
+      };
+    }
+    return cat;
+  });
+
   return (
-    <div className="threejs-container">
-      <Canvas camera={{ position: [0, 2, 8], fov: 60 }} shadows>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-        <SupermarcheScene setInfo={setInfo} categories={categories} />
-        <Environment preset="sunset" />
-        <CameraController />
-      </Canvas>
-    </div>
+    <>
+      <Header onCartClick={() => setOpenCart(true)} />
+      <div className="threejs-container">
+        <Canvas camera={{ position: [0, 2, 8], fov: 60 }} shadows>
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+          <SupermarcheScene setInfo={setInfo} categories={categoriesWithCart} />
+          <Environment preset="sunset" />
+          <CameraController />
+        </Canvas>
+      </div>
+      <CartModal
+        open={openCart}
+        setOpen={setOpenCart}
+        cart={cart}
+        setCart={setCart}
+        removeFromCart={removeFromCart}
+        clearCart={clearCart}
+        total={cartTotal}
+      />
+    </>
   );
 }
