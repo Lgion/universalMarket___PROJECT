@@ -3,29 +3,66 @@
   "sousCategories": [
     {
       "nom": "Boeuf",
-      "produits": [
-        {"id": 1, "nom": "Steak haché", "prix": 3.5, "description": "Steak haché pur boeuf 2x100g", "image": "",
- "personnalisation": [
-   {"type": "poids", "options": ["100g", "200g", "300g"]},
-   {"type": "parfum", "options": ["nature", "persil", "basilic"]}
- ]
-},
-        {"id": 2, "nom": "Côte de boeuf", "prix": 12.9, "description": "Côte de boeuf 400g", "image": ""}
-      ]
+      "produits": {
+        "steak-hache": [
+          {
+            "description": "Steak haché pur bœuf.",
+            "images": ["steak.png"],
+            "origine": "France",
+            "labelsQualite": ["Label Rouge"],
+            "decoupe": "haché",
+            "conservation": "frais",
+            "allergens": [],
+            "nutrition": {"kcal": 250, "protein": 26, "fat": 18, "carbs": 0},
+            "conseilsCuisson": "Cuire à la poêle 3 min de chaque côté.",
+            "ingredients": ["viande de bœuf"],
+            "ecoScore": "C",
+            "formats": [[0.125, 2.5], [0.250, 4.5]]
+          }
+        ]
+      }
     },
     {
-      "nom": "Poulet",
-      "produits": [
-        {"id": 3, "nom": "Blanc de poulet", "prix": 4.2, "description": "Blanc de poulet 200g", "image": ""},
-        {"id": 4, "nom": "Cuisses de poulet", "prix": 3.8, "description": "Cuisses de poulet 400g", "image": ""}
-      ]
+      "nom": "Volaille",
+      "produits": {
+        "escalope-poulet": [
+          {
+            "description": "Escalope tendre de poulet.",
+            "images": ["escalope_poulet.png"],
+            "origine": "France",
+            "labelsQualite": ["Bio"],
+            "decoupe": "escalope",
+            "conservation": "frais",
+            "allergens": [],
+            "nutrition": {"kcal": 110, "protein": 23, "fat": 1.2, "carbs": 0},
+            "conseilsCuisson": "Cuire à la poêle ou au four.",
+            "ingredients": ["filet de poulet"],
+            "ecoScore": "B",
+            "formats": [[0.150, 3.0], [0.300, 5.5]]
+          }
+        ]
+      }
     },
     {
       "nom": "Porc",
-      "produits": [
-        {"id": 5, "nom": "Côte de porc", "prix": 3.1, "description": "Côte de porc 200g", "image": ""},
-        {"id": 6, "nom": "Saucisse", "prix": 2.5, "description": "Saucisse de Toulouse 150g", "image": ""}
-      ]
+      "produits": {
+        "jambon-blanc": [
+          {
+            "description": "Jambon blanc supérieur, découenné, dégraissé.",
+            "images": ["jambon_blanc.png"],
+            "origine": "France",
+            "labelsQualite": [],
+            "decoupe": "tranches",
+            "conservation": "frais",
+            "allergens": ["lactose"],
+            "nutrition": {"kcal": 120, "protein": 20, "fat": 3, "carbs": 1},
+            "conseilsCuisson": "Prêt à consommer.",
+            "ingredients": ["jambon de porc", "sel", "conservateur"],
+            "ecoScore": "C",
+            "formats": [[0.100, 2.0], [0.200, 3.8]]
+          }
+        ]
+      }
     }
   ]
 }

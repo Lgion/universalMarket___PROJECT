@@ -50,9 +50,17 @@ export default function CartModal({ open, setOpen, cart, setCart, removeFromCart
                     <td>{item.format.lFormat}L</td>
                     <td>{parseFloat(item.format.pPrix).toFixed(2)} €</td>
                     <td>
-                      <button className="cart-btn" onClick={() => removeFromCart(idx)}>-</button>
-                      <span className="cart-qty">{item.qty || 1}</span>
-                      <button className="cart-btn" onClick={() => addQty(idx)}>+</button>
+                      <input
+  type="number"
+  className="cart-qty-input"
+  min={1}
+  max={99}
+  value={item.qty || 1}
+  onChange={e => {
+    const val = Math.max(1, Math.min(99, parseInt(e.target.value) || 1));
+    setCart(prev => prev.map((it, i) => i === idx ? { ...it, qty: val } : it));
+  }}
+/>
                     </td>
                     <td>
                       <button className="cart-btn cart-btn--delete" onClick={() => removeLine(idx)}>Supprimer</button>

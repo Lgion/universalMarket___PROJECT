@@ -1,7 +1,7 @@
-import {Dispo, Format, Brand, Boissons} from "./boissonsClasses.js"
+import {Dispo, Format, Brand, Product} from "./boissonsClasses.js"
 
 // --- EXEMPLE D'INSTANTIATION ---
-export const Vodka = new Boissons({
+export const Vodka = new Product({
   label: "Vodka",
   description: "Vodka pure, idéale pour cocktails",
   images: ["vodka.png", "vodka_ambiance.png"],

@@ -41,14 +41,51 @@
       color: #fff;
       background-color: rgba(255,255,255,0.2);
       border: none;
-      padding: 8px 12px;
+      padding: 8px 20px 8px 12px;
       border-radius: 4px;
       margin-left: 15px;
       cursor: pointer;
       transition: background-color 0.3s;
-      &:hover {
-        background-color: rgba(255,255,255,0.4);
-      }
+      position: relative;
+      font-weight: 600;
+      font-size: 1.08em;
+      outline: none;
+    }
+    button:hover {
+      background-color: rgba(255,255,255,0.4);
     }
   }
+
+.cart-badge {
+  position: absolute;
+  top: -0.7em;
+  right: -0.8em;
+  background: #d32f2f;
+  color: #fff;
+  border-radius: 50%;
+  min-width: 1.7em;
+  height: 1.7em;
+  font-size: 1em;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(211,47,47,0.15);
+  border: 2px solid #fff;
+  z-index: 1;
+  pointer-events: none;
+  animation: none;
+}
+.cart-badge-animate {
+  animation: cartBadgeBounce 0.45s cubic-bezier(.23,1.5,.32,1);
+}
+@keyframes cartBadgeBounce {
+  0% { transform: scale(1); }
+  18% { transform: scale(1.35); }
+  36% { transform: scale(0.93); }
+  54% { transform: scale(1.18); }
+  72% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
 }

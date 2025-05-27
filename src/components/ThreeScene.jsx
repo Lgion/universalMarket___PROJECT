@@ -362,7 +362,7 @@ export default function ThreeScene({ setInfo }) {
 
   return (
     <>
-      <Header onCartClick={() => setOpenCart(true)} />
+      <Header onCartClick={() => setOpenCart(true)} cartQty={cart.reduce((sum, item) => sum + (item.qty || 1), 0)} />
       <div className="threejs-container">
         <Canvas camera={{ position: [0, 2, 8], fov: 60 }} shadows>
           <ambientLight intensity={0.6} />

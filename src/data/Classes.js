@@ -60,7 +60,7 @@ export class Brand {
 }
 
 
-export class Boissons {
+export class Product {
   constructor({ label, description = null, images = [], brands = [] }) {
     this.label = label;
     this.description = description;
@@ -80,3 +80,50 @@ export class Boissons {
     }
   }
 }
+
+// --- CLASSES AVANCÉES POUR VIANDES ---
+
+export class Nutrition {
+  constructor({ kcal = null, protein = null, fat = null, carbs = null } = {}) {
+    this.kcal = kcal;
+    this.protein = protein;
+    this.fat = fat;
+    this.carbs = carbs;
+  }
+}
+
+export class Details {
+  constructor({ origine = null, labelsQualite = [], decoupe = null, conservation = null, allergens = [] } = {}) {
+    this.origine = origine;
+    this.labelsQualite = labelsQualite;
+    this.decoupe = decoupe;
+    this.conservation = conservation;
+    this.allergens = allergens;
+  }
+}
+
+export class Autre {
+  constructor({ conseilsCuisson = "", ingredients = [], ecoScore = null } = {}) {
+    this.conseilsCuisson = conseilsCuisson;
+    this.ingredients = ingredients;
+    this.ecoScore = ecoScore;
+  }
+}
+
+export class MeatProduct extends Product {
+  constructor({
+    label,
+    description = null,
+    images = [],
+    brands = [],
+    details = {},
+    nutrition = {},
+    autre = {}
+  }) {
+    super({ label, description, images, brands });
+    this.details = new Details(details);
+    this.nutrition = new Nutrition(nutrition);
+    this.autre = new Autre(autre);
+  }
+}
+

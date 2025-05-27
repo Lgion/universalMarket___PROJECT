@@ -1,7 +1,35 @@
 import React from "react";
-import { Box, Text } from "@react-three/drei";
+import { Box, Text, Html } from "@react-three/drei";
 import { boissons } from "../data/Objects.js";
 // --- Composant interactif minimal pour un produit boissons ---
+
+// Style pour le bouton panier 3D
+// À placer dans le SCSS global si pas de CSS-in-JS
+/*
+.btn-panier-3d {
+  background: #fff;
+  color: #d32f2f;
+  border: 2px solid #d32f2f;
+  border-radius: 50%;
+  font-size: 1.15em;
+  font-weight: bold;
+  width: 2.1em;
+  height: 2.1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(211,47,47,0.12);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+  margin-left: 0.5em;
+}
+.btn-panier-3d:hover, .btn-panier-3d:focus {
+  background: #d32f2f;
+  color: #fff;
+  transform: scale(1.13);
+  outline: none;
+}
+*/
 import { useState } from "react";
 import { a, useSpring } from "@react-spring/three";
 
@@ -127,7 +155,7 @@ export default function Gondola({ position, color, onClick, label, width = 1, su
 
 
 function BoissonProduct3D({ produit, position, onAddToCart = () => {} }) {
-  const [step, setStep] = useState(0); // 0=produit, 1=marque, 2=format
+  const [step, setStep] = useState(0); // 0=produit, 1=marque, 2=format, 3=prix/qty
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedFormat, setSelectedFormat] = useState(null);
   const { rotationY } = useSpring({ rotationY: step * Math.PI / 2 });
@@ -138,70 +166,192 @@ function BoissonProduct3D({ produit, position, onAddToCart = () => {} }) {
     else if (step === 1 && selectedBrand) setStep(2);
   };
 
-  // Clic sur format = ajout au panier
-  const handleAddToCart = (format) => {
-    setSelectedFormat(format);
-    onAddToCart({ produit, brand: selectedBrand, format });
-    // Reset pour éviter le double ajout
-    setStep(0);
-    setSelectedBrand(null);
-    setSelectedFormat(null);
-  };
-
-
-
   // Affichage dynamique
+  // Bandeau récapitulatif des choix précédents
   let display = null;
+  let recap = null;
+  if (step > 0) {
+    recap = (
+      <Html center position={[0,0.45,0]} zIndex={10} occlude={false}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.35em',
+          background: 'rgba(255,255,255,0.92)',
+          borderRadius: '22px',
+          boxShadow: '0 2px 12px rgba(60,60,90,0.10)',
+          padding: '0.25em 1.1em',
+          fontSize: '1em',
+          fontWeight: 500,
+          minHeight: '2.1em',
+          marginBottom: '0.15em',
+        }}>
+          <span className="recap-pill" style={{background: step===0 ? '#1976d2':'#e3f2fd', color: step===0 ? '#fff':'#1976d2', borderRadius: '14px', padding: '0.2em 0.9em', fontWeight: 600}}>
+            {produit.label}
+          </span>
+          {step > 1 && selectedBrand && (
+            <>
+              <span style={{color:'#bdbdbd',fontWeight:700}}>&rarr;</span>
+              <span className="recap-pill" style={{background: step===1 ? '#1976d2':'#e3f2fd', color: step===1 ? '#fff':'#1976d2', borderRadius: '14px', padding: '0.2em 0.9em', fontWeight: 600}}>
+                {selectedBrand.bLabel}
+              </span>
+            </>
+          )}
+          {step > 2 && selectedFormat && (
+            <>
+              <span style={{color:'#bdbdbd',fontWeight:700}}>&rarr;</span>
+              <span className="recap-pill" style={{background: step===2 ? '#1976d2':'#e3f2fd', color: step===2 ? '#fff':'#1976d2', borderRadius: '14px', padding: '0.2em 0.9em', fontWeight: 600}}>
+                {selectedFormat.lFormat}L
+              </span>
+            </>
+          )}
+        </div>
+      </Html>
+    );
+  }
+
   if (step === 0) {
-    // Affiche le produit (image ou cube avec nom)
+    // Affiche le produit (image si dispo, sinon cube avec nom)
+    const img = produit.images && produit.images[0] && [
+      'coca.png','fanta.png','jin.png','jus_pomme.png','oasis.png','rhum.png','vodka.png','wiskey.png'
+    ].includes(produit.images[0]) ? produit.images[0] : null;
     display = (
       <mesh onClick={handleClick} position={[0,0,0]} castShadow>
         <boxGeometry args={[0.6, 0.6, 0.3]} />
         <meshStandardMaterial color="#fff8e1" />
-        {/* Image produit si dispo */}
-        {/* Optionnel: <Image ... /> */}
-        <Text position={[0,0,0.18]} fontSize={0.15} color="#333" anchorX="center" anchorY="middle">
-          {produit.label}
-        </Text>
+        {img ? (
+          <Html center position={[0,0,0.19]} zIndex={10} billboard distanceFactor={1.6}>
+            <div
+              style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',cursor:'pointer'}}
+              onClick={e => { e.stopPropagation(); handleClick(); }}
+              title={produit.label}
+            >
+              <img src={`/src/public/${img}`} alt={produit.label} style={{width:'5.2em',height:'5.2em',objectFit:'contain',borderRadius:'10px',boxShadow:'0 2px 10px rgba(0,0,0,0.13)'}} />
+              <span style={{fontSize:'0.62em',color:'#333',fontWeight:600,marginTop:'0.09em',textShadow:'0 1px 3px #fff'}}> {produit.label} </span>
+            </div>
+          </Html>
+        ) : (
+          <Text position={[0,0,0.18]} fontSize={0.15} color="#333" anchorX="center" anchorY="middle">
+            {produit.label}
+          </Text>
+        )}
       </mesh>
     );
   } else if (step === 1) {
     // Affiche les marques (boutons cliquables)
-    display = produit.brands.map((brand, i) => (
-      <mesh
-        key={brand.bLabel}
-        position={[0, 0.25 - i*0.3, 0]}
-        onClick={() => { setSelectedBrand(brand); setStep(2); }}
-        castShadow
-      >
-        <boxGeometry args={[0.5, 0.22, 0.25]} />
-        <meshStandardMaterial color="#e1f5fe" />
-        <Text position={[0,0,0.14]} fontSize={0.11} color="#01579b" anchorX="center" anchorY="middle">
-          {brand.bLabel}
-        </Text>
-      </mesh>
-    ));
+    display = (
+      <>
+        {produit.brands.map((brand, i) => (
+          <mesh
+            key={brand.bLabel}
+            position={[0, 0.25 - i*0.3, 0]}
+            onClick={() => { setSelectedBrand(brand); setStep(2); }}
+            castShadow
+          >
+            <boxGeometry args={[0.5, 0.22, 0.25]} />
+            <meshStandardMaterial color="#e1f5fe" />
+            <Text position={[0,0,0.14]} fontSize={0.11} color="#01579b" anchorX="center" anchorY="middle">
+              {brand.bLabel}
+            </Text>
+          </mesh>
+        ))}
+        <Html center position={[0,-0.45,0]}>
+          <button className="btn-retour-3d" onClick={e => { e.stopPropagation(); setStep(0); setSelectedBrand(null); setSelectedFormat(null); }}>
+            ← Retour
+          </button>
+        </Html>
+      </>
+    );
   } else if (step === 2 && selectedBrand) {
-    // Affiche les formats (boutons cliquables)
-    display = selectedBrand.formats.map((format, i) => (
-      <mesh
-        key={format.lFormat}
-        position={[0, 0.25 - i*0.22, 0]}
-        onClick={e => { e.stopPropagation(); handleAddToCart(format); }}
-        castShadow
-      >
+    // Affiche les formats (boutons cliquables, nouvelle étape)
+    display = (
+      <>
+        {selectedBrand.formats.map((format, i) => (
+          <mesh
+            key={format.lFormat}
+            position={[0, 0.25 - i*0.22, 0]}
+            onClick={e => { e.stopPropagation(); setSelectedFormat(format); setStep(3); }}
+            castShadow
+          >
+            <boxGeometry args={[0.35, 0.16, 0.18]} />
+            <meshStandardMaterial color="#ffe0b2" />
+            <Text position={[0,0,0.1]} fontSize={0.09} color="#bf360c" anchorX="center" anchorY="middle">
+              {format.lFormat}
+            </Text>
+          </mesh>
+        ))}
+        <Html center position={[0,-0.45,0]}>
+          <button className="btn-retour-3d" onClick={e => { e.stopPropagation(); setStep(1); setSelectedFormat(null); }}>
+            ← Retour
+          </button>
+        </Html>
+      </>
+    );
+  } else if (step === 3 && selectedBrand && selectedFormat) {
+    // Affiche le prix, input quantité et bouton panier pour le format sélectionné
+    display = (
+      <mesh position={[0, 0, 0]} castShadow>
         <boxGeometry args={[0.35, 0.16, 0.18]} />
         <meshStandardMaterial color="#ffe0b2" />
         <Text position={[0,0,0.1]} fontSize={0.09} color="#bf360c" anchorX="center" anchorY="middle">
-          {format.lFormat}L - {format.pPrix}€
+          {selectedFormat.lFormat}L - {selectedFormat.pPrix}€
         </Text>
+        <Html center position={[0,0,0.15]}>
+          <div style={{display:'flex',alignItems:'center',gap:'0.4em'}}>
+            <input
+              type="number"
+              min={1}
+              max={selectedFormat?.dispo?.qte > 0 ? selectedFormat.dispo.qte : 1}
+              defaultValue={1}
+              className="cart-qty-input"
+              style={{width:'2.4em',marginRight:'0.2em'}}
+              aria-label="Quantité"
+              onClick={e => e.stopPropagation()}
+              id={`input-qty-${selectedFormat.lFormat}`}
+              disabled={selectedFormat?.dispo?.qte <= 0}
+              placeholder={selectedFormat?.dispo?.qte <= 0 ? 'Rupture' : undefined}
+            />
+            <button
+              className="btn-panier-3d"
+              title="Ajouter au panier"
+              disabled={selectedFormat?.dispo?.qte <= 0}
+              onClick={e => {
+                e.stopPropagation();
+                const input = document.getElementById(`input-qty-${selectedFormat.lFormat}`);
+                let qty = 1;
+                const max = selectedFormat?.dispo?.qte > 0 ? selectedFormat.dispo.qte : 1;
+                if (input && input.value) {
+                  qty = Math.max(1, Math.min(max, parseInt(input.value) || 1));
+                }
+                // Ajoute au panier avec la quantité
+                onAddToCart({ produit, brand: selectedBrand, format: selectedFormat, qty });
+                // Reset
+                setStep(0);
+                setSelectedBrand(null);
+                setSelectedFormat(null);
+              }}
+            >
+              🛒
+            </button>
+            {selectedFormat?.dispo?.qte <= 0 && (
+              <span style={{color:'#d32f2f',fontWeight:600,marginLeft:'0.5em'}}>Rupture de stock</span>
+            )}
+            <button
+              className="btn-retour-3d"
+              style={{marginLeft:'0.7em'}}
+              onClick={e => { e.stopPropagation(); setStep(2); }}
+            >
+              ← Retour
+            </button>
+          </div>
+        </Html>
       </mesh>
-    ));
+    );
   }
 
   return (
-    // <a.group position={position} rotation-y={rotationY}>
     <a.group position={position}>
+      {recap}
       {display}
     </a.group>
   );

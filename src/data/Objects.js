@@ -1,9 +1,12 @@
-import {Dispo, Format, Brand, Boissons} from "./Classes.js"
+import {Dispo, Format, Brand, Product, MeatProduct} from "./Classes.js"
 
 
 import boissonsData from './categories/boissons.json';
+import viandesData from './categories/viandes.json';
 
 const boissons = {};
+const viandes = {};
+
 
 // Génération dynamique imbriquée par sous-catégorie
 boissonsData.sousCategories.forEach(sousCat => {
@@ -15,7 +18,7 @@ boissonsData.sousCategories.forEach(sousCat => {
   if (sousCat.produits && typeof sousCat.produits === 'object') {
     boissons[sousCatKey] = {};
     Object.entries(sousCat.produits).forEach(([boissonKey, brandsArr]) => {
-      boissons[sousCatKey][boissonKey] = new Boissons({
+      boissons[sousCatKey][boissonKey] = new Product({
         label: boissonKey.charAt(0).toUpperCase() + boissonKey.slice(1),
         images: (!brandsArr[0].brand)?brandsArr[0].images:[],
         description: (!brandsArr[0].brand)?brandsArr[0].description:"",
@@ -39,11 +42,48 @@ boissonsData.sousCategories.forEach(sousCat => {
   }
 });
 
-export { Boissons };
-export {boissons};
+
+viandesData.sousCategories.forEach(sousCat => {
+  const sousCatKey = sousCat.nom
+    .toLowerCase()
+    .normalize("NFD").replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, "-");
+  if (sousCat.produits && typeof sousCat.produits === 'object') {
+    viandes[sousCatKey] = {};
+    Object.entries(sousCat.produits).forEach(([viandeKey, variantsArr]) => {
+      // On prend la première entrée comme base
+      const base = variantsArr[0];
+      viandes[sousCatKey][viandeKey] = new MeatProduct({
+        label: viandeKey.charAt(0).toUpperCase() + viandeKey.slice(1).replace(/-/g, ' '),
+        description: base.description || "",
+        images: base.images || [],
+        brands: [], // À enrichir si besoin
+        details: {
+          origine: base.origine || null,
+          labelsQualite: base.labelsQualite || [],
+          decoupe: base.decoupe || null,
+          conservation: base.conservation || null,
+          allergens: base.allergens || []
+        },
+        nutrition: base.nutrition || {},
+        autre: {
+          conseilsCuisson: base.conseilsCuisson || "",
+          ingredients: base.ingredients || [],
+          ecoScore: base.ecoScore || null
+        }
+      });
+    });
+  }
+});
+
+
+export { Product };
+export { boissons };
+export { viandesData, viandes };
+
 /*
 // --- EXEMPLE D'INSTANTIATION ---
-export const Vodka = new Boissons({
+export const Vodka = new Product({
   label: "Vodka",
   description: "Vodka pure, idéale pour cocktails",
   images: ["vodka.png", "vodka_ambiance.png"],
