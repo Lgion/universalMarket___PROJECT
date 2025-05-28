@@ -4,7 +4,7 @@
     {
       "nom": "Boeuf",
       "produits": {
-        "cotes": [
+        "steak-hache": [
           {
             "description": "Steak haché pur bœuf.",
             "images": ["steak.png"],

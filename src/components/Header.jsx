@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import "./Header.scss";
-import { Boissons,boissons} from "../data/Objects.js";
+import { boissons} from "../data/Objects.js";
 
 
 export default function Header({ onCartClick, cartQty }) {

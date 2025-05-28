@@ -1,3 +1,8 @@
+import {
+  Grill,Raw,Details,Nutrition,Autre,
+  PARTIE_MEAT
+} from "./SubClasses"
+
 // Objets de base
 // Nouvelle structure optimisée pour les boissons
 
@@ -32,9 +37,31 @@ export class NewDispo {
 
 export class Format {
   constructor({ lFormat, pPrix, dispo }) {
+    // j'aimerai pouvoir ici avoir un paramètre pour diversifier les objets "racine" comme Format, Brand,...)
+    // ex: this.type="bottle"
+    // ...si bien sur je garde Format comme objet racine...
     this.lFormat = lFormat;
     this.pPrix = pPrix;
     this.dispo = dispo instanceof Dispo ? dispo : new Dispo(dispo);
+    this.unit="---noUnit---"
+  }
+}
+export class FormatBottle extends Format {
+  constructor(rest) {
+    super(rest)
+    this.unit = "Litre";
+  }
+}
+export class FormatMeat extends Format {
+  constructor({ pack=[1],  type="simple", raw=null,froze=null,grill=null, ...rest }) {
+    super(rest)
+    this.unit = "Kg";
+    this.pack = pack
+    this.type = type
+    this.grill = grill?new Grill(grill):grill
+    this.raw = raw?new Raw(raw):raw
+    this.froze = froze===undefined?froze:true
+    this.state = raw?"raw":froze?"froze":grill?"grill":null
   }
 }
 
@@ -81,46 +108,18 @@ export class Product {
   }
 }
 
-// --- CLASSES AVANCÉES POUR VIANDES ---
-
-export class Nutrition {
-  constructor({ kcal = null, protein = null, fat = null, carbs = null } = {}) {
-    this.kcal = kcal;
-    this.protein = protein;
-    this.fat = fat;
-    this.carbs = carbs;
-  }
-}
-
-export class Details {
-  constructor({ origine = null, labelsQualite = [], decoupe = null, conservation = null, allergens = [] } = {}) {
-    this.origine = origine;
-    this.labelsQualite = labelsQualite;
-    this.decoupe = decoupe;
-    this.conservation = conservation;
-    this.allergens = allergens;
-  }
-}
-
-export class Autre {
-  constructor({ conseilsCuisson = "", ingredients = [], ecoScore = null } = {}) {
-    this.conseilsCuisson = conseilsCuisson;
-    this.ingredients = ingredients;
-    this.ecoScore = ecoScore;
-  }
-}
 
 export class MeatProduct extends Product {
   constructor({
-    label,
-    description = null,
-    images = [],
-    brands = [],
+    partie = [],
     details = {},
     nutrition = {},
-    autre = {}
+    autre = {},
+    ...rest
   }) {
-    super({ label, description, images, brands });
+    super(rest);
+    this.partie = PARTIE_MEAT[this.partie[0]]
+                    .findIndex(p=>p===this.partie[1])===-1 ? null : this.partie[1]
     this.details = new Details(details);
     this.nutrition = new Nutrition(nutrition);
     this.autre = new Autre(autre);

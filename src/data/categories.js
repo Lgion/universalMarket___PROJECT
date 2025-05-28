@@ -1,8 +1,8 @@
-import {boissons} from "./Objects.js"
+import {boissons, viandes} from "./Objects.js"
 
 // Nouvelle structure : catégories alignées avec le prompt, chargement dynamique des données JSON
 export const categoriesMeta = [
-  // { id: "viandes", name: "Viandes", color: 0x8B4513 },
+  { id: "viandes", name: "Viandes", color: 0x8B4513, objet: viandes },
   { id: "boissons", name: "Boissons", color: 0x007bff, object: boissons },
   // { id: "boulangerie", name: "Boulangerie/Pâtisserie", color: 0xffe4b5 },
   // { id: "cuisine", name: "Cuisine", color: 0xf5c542 },

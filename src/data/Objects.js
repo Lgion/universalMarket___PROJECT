@@ -1,4 +1,4 @@
-import {Dispo, Format, Brand, Product, MeatProduct} from "./Classes.js"
+import {Dispo, FormatBottle, Brand, Product, MeatProduct} from "./Classes.js"
 
 
 import boissonsData from './categories/boissons.json';
@@ -20,16 +20,20 @@ boissonsData.sousCategories.forEach(sousCat => {
     Object.entries(sousCat.produits).forEach(([boissonKey, brandsArr]) => {
       boissons[sousCatKey][boissonKey] = new Product({
         label: boissonKey.charAt(0).toUpperCase() + boissonKey.slice(1),
-        images: (!brandsArr[0].brand)?brandsArr[0].images:[],
-        description: (!brandsArr[0].brand)?brandsArr[0].description:"",
+// brand==null {
+  images: (!brandsArr[0].brand)?brandsArr[0].images:[],
+  description: (!brandsArr[0].brand)?brandsArr[0].description:"",
+// }
         brands: brandsArr
-          .filter(brandData => brandData.brand)
+// brand==null {
+  .filter(brandData => brandData.brand)
+// }
           .map(brandData =>
             new Brand({
               bLabel: brandData.brand,
               bDescription: brandData.description,
               formats: brandData.formats.map(([lFormat, pPrix]) =>
-                new Format({
+                new FormatBottle({
                   lFormat: lFormat.toString(),
                   pPrix,
                   dispo: new Dispo({})
@@ -79,7 +83,7 @@ viandesData.sousCategories.forEach(sousCat => {
 
 export { Product };
 export { boissons };
-export { viandesData, viandes };
+export { viandes };
 
 /*
 // --- EXEMPLE D'INSTANTIATION ---
@@ -93,12 +97,12 @@ export const Vodka = new Product({
       bImage: "poliakov.png",
       bDescription: "Une vodka française de qualité.",
       formats: [
-        new Format({
+        new FormatBottle({
           lFormat: ".33",
           pPrix: 7.0,
           dispo: new Dispo({})
         }),
-        new Format({
+        new FormatBottle({
           lFormat: "1",
           pPrix: 18.0,
           dispo: new Dispo({})
@@ -110,12 +114,12 @@ export const Vodka = new Product({
       bImage: "absolut.png",
       bDescription: "La vodka suédoise iconique.",
       formats: [
-        new Format({
+        new FormatBottle({
           lFormat: ".33",
           pPrix: 8.0,
           dispo: new Dispo({})
         }),
-        new Format({
+        new FormatBottle({
           lFormat: "1",
           pPrix: 19.0,
           dispo: new Dispo({})
@@ -126,7 +130,7 @@ export const Vodka = new Product({
       bLabel: "Grey Goose",
       bImage: "greygoose.png",
       bDescription: "Vodka française premium, réputée pour sa pureté.",
-      formats: new Format([
+      formats: new FormatBottle([
         {
           lFormat: ".33",
           pPrix: 12.0,
@@ -143,7 +147,7 @@ export const Vodka = new Product({
       bLabel: "Belvedere",
       bImage: "belvedere.png",
       bDescription: "Une vodka polonaise de luxe, distillée à partir de seigle.",
-      formats: new Format([
+      formats: new FormatBottle([
         {
           lFormat: ".33",
           pPrix: 14.0,
@@ -160,7 +164,7 @@ export const Vodka = new Product({
       bLabel: "Smirnoff",
       bImage: "smirnoff.png",
       bDescription: "La vodka la plus vendue au monde, d'origine russe.",
-      formats: new Format([
+      formats: new FormatBottle([
         {
           lFormat: ".33",
           pPrix: 6.0,
