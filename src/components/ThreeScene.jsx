@@ -4,6 +4,7 @@ import { Environment } from "@react-three/drei";
 import { categoriesMeta, loadCategoriesData } from "../data/categories";
 import { adsData } from "../data/ads";
 import Gondola from "./Gondola";
+import { boissons, viandes } from "../data/Objects.js";
 
 // Constantes de dimensions (adaptées du JS original)
 const AISLE_WIDTH = 10;
@@ -347,18 +348,15 @@ export default function ThreeScene({ setInfo }) {
 
   if (!categories) return <div className="threejs-container">Chargement des rayons...</div>;
 
+
   // On injecte addToCart et openCart dans chaque gondole boissons
-  const categoriesWithCart = categories.map(cat => {
-    if (cat.id === "boissons") {
-      return {
+  const categoriesWithCart = categories.map(cat => ({
         ...cat,
         gondolaProps: {
-          onAddToCart: addToCart
+          onAddToCart: addToCart,
+          productLabel: cat.id,
         }
-      };
-    }
-    return cat;
-  });
+  }));
 
   return (
     <>

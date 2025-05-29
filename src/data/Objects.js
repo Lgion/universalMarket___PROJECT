@@ -19,7 +19,7 @@ const viandes = {};
  *   - getBrandLabel: fonction pour transformer la valeur du champ brand (optionnel)
  *   - formatFormatArgs: fonction pour transformer les arguments du format (optionnel)
  */
-export function generateFromSousCategorie({
+function generateFromSousCategorie({
   targetObj,
   ProductClass,
   BrandClass,
@@ -214,7 +214,7 @@ console.log(viandes_);
 
 
 
-export { Product };
+// export { Product };
 export { boissons };
 export { viandes };
 

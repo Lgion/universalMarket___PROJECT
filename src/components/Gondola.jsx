@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Text, Html } from "@react-three/drei";
-import { boissons,viandes } from "../data/Objects.js";
+import * as products from "../data/Objects.js";
 // --- Composant interactif minimal pour un produit boissons ---
 
 // Style pour le bouton panier 3D
@@ -33,6 +33,10 @@ import { boissons,viandes } from "../data/Objects.js";
 import { useState } from "react";
 import { a, useSpring } from "@react-spring/three";
 
+
+// const products = {boissons, viandes}
+
+
 // Composant Gondola : représente une gondole creuse orientée correctement dans la scène
 // - position : position 3D de la gondole dans la scène
 // - color : couleur principale de la gondole
@@ -40,7 +44,9 @@ import { a, useSpring } from "@react-spring/three";
 // - label : texte affiché sur l'étiquette en façade
 // width : largeur dynamique de la gondole (dépend du nombre de sous-catégories)
 // Ajout d'une prop subcategories pour afficher les colonnes
-export default function Gondola({ position, color, onClick, label, width = 1, subcategories = [], onAddToCart }) {
+export default function Gondola({ position, color, onClick, label, width = 1, subcategories = [], onAddToCart, productLabel }) {
+  const produitsData = products[productLabel]
+  
   return (
     // Groupe 3D principal, pivoté pour que la profondeur soit perpendiculaire à l'allée
     <group position={position} rotation={[0, Math.PI / 2, 0]}>
@@ -84,7 +90,7 @@ export default function Gondola({ position, color, onClick, label, width = 1, su
           .toLowerCase()
           .normalize("NFD").replace(/\p{Diacritic}/gu, "")
           .replace(/\s+/g, "-");
-        const produitsObj = boissons[sousCatKey] || {};
+        const produitsObj = produitsData[sousCatKey] || {};
         const produitKeys = Object.keys(produitsObj);
         return (
           <group key={sc.nom}>

@@ -10,7 +10,7 @@ import {
 // Factories pour la structure imbriquée
 // --- CLASSES ---
 export class Dispo {
-  constructor({ qte = 0, dAbsolutePromotion = 0, zoneID = null } = {}) {
+  constructor({ qte = 1, dAbsolutePromotion = 0, zoneID = null } = {}) {
     this.qte = qte;
     this.dAbsolutePromotion = dAbsolutePromotion;
     this.zoneID = zoneID;
