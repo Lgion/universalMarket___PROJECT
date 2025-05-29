@@ -6,6 +6,7 @@ import viandesData from './categories/viandes.json';
 
 const boissons = {};
 const boissons_ = {};
+const viandes_ = {};
 const viandes = {};
 
 /**
@@ -25,8 +26,16 @@ export function generateFromSousCategorie({
   FormatClass,
   getBrandLabel = brand => brand,
   formatFormatArgs = (lFormat, pPrix, extra = {}) => ({ lFormat, pPrix, ...extra }),
-  getVracBrand // optionnel : fonction qui retourne l'objet vrac à ajouter (ou null si non utilisé)
 }) {
+  const getVracBrand = ({ generic, BrandClass, FormatClass, formatFormatArgs }) => {
+    return new BrandClass({
+      bLabel: "Vrac",
+      bDescription: "Vrac sans marque",
+      formats: (generic.formats || []).map(([lFormat, pPrix, formats = {}]) =>
+        new FormatClass(formatFormatArgs(lFormat, pPrix, formats))
+      )
+    });
+  }
   return function(sousCat) {
     const sousCatKey = sousCat.nom
       .toLowerCase()
@@ -40,7 +49,7 @@ export function generateFromSousCategorie({
         const images = generic.images || (variantsArr[0] && variantsArr[0].images) || [];
         const description = generic.description || (variantsArr[0] && variantsArr[0].description) || "";
         const brands = variantsArr
-          .filter(variant => variant.brand !== null)
+          .filter(variant => variant.brand)
           .map(variant => new BrandClass({
             bLabel: getBrandLabel(variant.brand),
             bDescription: variant.description || "",
@@ -49,21 +58,33 @@ export function generateFromSousCategorie({
             )
           }));
         // Ajout de la propriété vrac si getVracBrand est fourni
-        const vrac = getVracBrand ? getVracBrand({ generic, BrandClass, FormatClass, formatFormatArgs }) : undefined;
+        console.log(getVracBrand);
+        const vrac = variantsArr
+        .filter(variant => variant.brand===false)
+        .map(variant => (variant.formats || []).map(([lFormat, pPrix, extra = {}]) =>
+          new FormatClass(formatFormatArgs(lFormat, pPrix, extra)))
+        )
+        // const vrac = getVracBrand ? getVracBrand({ generic, BrandClass, FormatClass, formatFormatArgs }) : undefined;
+        console.log(vrac);
+        
         const productObj = {
           label: prodKey.charAt(0).toUpperCase() + prodKey.slice(1).replace(/-/g, ' '),
           images,
           description,
-          brands
+          brands,
+          vrac
         };
-        if (vrac) productObj.vrac = vrac;
+        console.log(productObj);
+        // if (vrac) productObj.vrac = vrac;
         targetObj[sousCatKey][prodKey] = new ProductClass(productObj);
       });
     }
   }
 }
+
 // Génération dynamique imbriquée par sous-catégorie
-console.log(boissonsData.sousCategories[0]);
+// console.log(boissonsData.sousCategories[0]);
+// console.log(viandesData.sousCategories[0]);
 
 
 boissonsData.sousCategories.forEach(sousCat=>generateFromSousCategorie({
@@ -74,7 +95,17 @@ boissonsData.sousCategories.forEach(sousCat=>generateFromSousCategorie({
   getBrandLabel: b => b,
   formatFormatArgs: (lFormat, pPrix) => ({ lFormat, pPrix })
 })(sousCat))
+viandesData.sousCategories.forEach(sousCat=>generateFromSousCategorie({
+  targetObj: viandes,
+  ProductClass: MeatProduct,
+  BrandClass: Brand,
+  FormatClass: FormatMeat,
+  getBrandLabel: b => b,
+  formatFormatArgs: (lFormat, pPrix, extra) => ({ lFormat, pPrix, ...extra })
+})(sousCat))
 
+
+/*
 // Génération dynamique imbriquée par sous-catégorie
 boissonsData.sousCategories.forEach(sousCat => {
   // Normalise le nom de la sous-catégorie (minuscule, sans accent ni espace)
@@ -112,6 +143,7 @@ boissonsData.sousCategories.forEach(sousCat => {
     });
   }
 });
+console.log(boissons_);
 
 
 viandesData.sousCategories.forEach(sousCat => {
@@ -122,7 +154,7 @@ viandesData.sousCategories.forEach(sousCat => {
     .replace(/\s+/g, "-");
 
   if (sousCat.produits && typeof sousCat.produits === 'object') {
-    viandes[sousCatKey] = {};
+    viandes_[sousCatKey] = {};
 
     Object.entries(sousCat.produits).forEach(([viandeKey, variantsArr]) => {
       // Cherche l'entrée générique (brand:null)
@@ -166,7 +198,7 @@ viandesData.sousCategories.forEach(sousCat => {
       });
 
 
-      viandes[sousCatKey][viandeKey] = new MeatProduct({
+      viandes_[sousCatKey][viandeKey] = new MeatProduct({
         label: viandeKey.charAt(0).toUpperCase() + viandeKey.slice(1).replace(/-/g, ' '),
         images,
         description,
@@ -177,9 +209,10 @@ viandesData.sousCategories.forEach(sousCat => {
     });
   }
 });
+console.log(viandes_);
+*/
 
 
-console.log(boissons_);
 
 export { Product };
 export { boissons };

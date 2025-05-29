@@ -17,15 +17,6 @@
               [1, 80.0, {"raw": {"quality": "medium"}}],
               [0.1, 8.5, {"grill": {"method": "boiled"}}]
             ]
-          },
-          {
-            "brand": false,
-            "description": "Côte de bœuf vendue en vrac, sans marque.",
-            "formats": [
-              [0.1, 6.0, {"froze": true, "pack": [2,5,10]}],
-              [1, 70.0, {"raw": {"quality": "low"}}],
-              [0.1, 6.0, {"grill": {"method": "four"}}]
-            ]
           }
         ],
         "filet": [

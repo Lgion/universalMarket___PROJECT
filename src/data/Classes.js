@@ -60,7 +60,7 @@ export class FormatMeat extends Format {
     this.travail = travail
     this.grill = grill?new Grill(grill):grill
     this.raw = raw?new Raw(raw):raw
-    this.froze = froze===undefined?froze:true
+    this.froze = !froze?froze:true
     this.state = raw?"raw":froze?"froze":grill?"grill":null
   }
 }
@@ -109,7 +109,16 @@ export class Product {
 }
 
 
-export class MeatProduct extends Product {
+export class ProductVrac extends Product {
+  constructor({
+    vrac = null,
+    ...rest
+  }) {
+    super(rest);
+    this.vrac = vrac;
+  }
+}
+export class MeatProduct extends ProductVrac {
   constructor({
     partie = [],
     details = {},
