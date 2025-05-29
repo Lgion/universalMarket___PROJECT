@@ -5,8 +5,75 @@ import boissonsData from './categories/boissons.json';
 import viandesData from './categories/viandes.json';
 
 const boissons = {};
+const boissons_ = {};
 const viandes = {};
 
+/**
+ * Fonction générique pour générer dynamiquement un objet produit à partir d'une sous-catégorie.
+ * @param {Object} options
+ *   - targetObj: l'objet cible (ex: boissons, viandes)
+ *   - ProductClass: classe produit à instancier (Product, MeatProduct...)
+ *   - BrandClass: classe marque à instancier (Brand)
+ *   - FormatClass: classe format à instancier (FormatBottle, FormatMeat...)
+ *   - getBrandLabel: fonction pour transformer la valeur du champ brand (optionnel)
+ *   - formatFormatArgs: fonction pour transformer les arguments du format (optionnel)
+ */
+export function generateFromSousCategorie({
+  targetObj,
+  ProductClass,
+  BrandClass,
+  FormatClass,
+  getBrandLabel = brand => brand,
+  formatFormatArgs = (lFormat, pPrix, extra = {}) => ({ lFormat, pPrix, ...extra }),
+  getVracBrand // optionnel : fonction qui retourne l'objet vrac à ajouter (ou null si non utilisé)
+}) {
+  return function(sousCat) {
+    const sousCatKey = sousCat.nom
+      .toLowerCase()
+      .normalize("NFD").replace(/\p{Diacritic}/gu, "")
+      .replace(/\s+/g, "-");
+    if (sousCat.produits && typeof sousCat.produits === 'object') {
+      targetObj[sousCatKey] = {};
+      Object.entries(sousCat.produits).forEach(([prodKey, variantsArr]) => {
+        // Générique (brand:null)
+        const generic = variantsArr.find(v => v.brand === null) || {};
+        const images = generic.images || (variantsArr[0] && variantsArr[0].images) || [];
+        const description = generic.description || (variantsArr[0] && variantsArr[0].description) || "";
+        const brands = variantsArr
+          .filter(variant => variant.brand !== null)
+          .map(variant => new BrandClass({
+            bLabel: getBrandLabel(variant.brand),
+            bDescription: variant.description || "",
+            formats: (variant.formats || []).map(([lFormat, pPrix, extra = {}]) =>
+              new FormatClass(formatFormatArgs(lFormat, pPrix, extra))
+            )
+          }));
+        // Ajout de la propriété vrac si getVracBrand est fourni
+        const vrac = getVracBrand ? getVracBrand({ generic, BrandClass, FormatClass, formatFormatArgs }) : undefined;
+        const productObj = {
+          label: prodKey.charAt(0).toUpperCase() + prodKey.slice(1).replace(/-/g, ' '),
+          images,
+          description,
+          brands
+        };
+        if (vrac) productObj.vrac = vrac;
+        targetObj[sousCatKey][prodKey] = new ProductClass(productObj);
+      });
+    }
+  }
+}
+// Génération dynamique imbriquée par sous-catégorie
+console.log(boissonsData.sousCategories[0]);
+
+
+boissonsData.sousCategories.forEach(sousCat=>generateFromSousCategorie({
+  targetObj: boissons,
+  ProductClass: Product,
+  BrandClass: Brand,
+  FormatClass: FormatBottle,
+  getBrandLabel: b => b,
+  formatFormatArgs: (lFormat, pPrix) => ({ lFormat, pPrix })
+})(sousCat))
 
 // Génération dynamique imbriquée par sous-catégorie
 boissonsData.sousCategories.forEach(sousCat => {
@@ -16,9 +83,9 @@ boissonsData.sousCategories.forEach(sousCat => {
     .normalize("NFD").replace(/\p{Diacritic}/gu, "")
     .replace(/\s+/g, "-");
   if (sousCat.produits && typeof sousCat.produits === 'object') {
-    boissons[sousCatKey] = {};
+    boissons_[sousCatKey] = {};
     Object.entries(sousCat.produits).forEach(([boissonKey, brandsArr]) => {
-      boissons[sousCatKey][boissonKey] = new Product({
+      boissons_[sousCatKey][boissonKey] = new Product({
         label: boissonKey.charAt(0).toUpperCase() + boissonKey.slice(1),
 // brand===null {
   images: (!brandsArr[0].brand)?brandsArr[0].images:[],
@@ -84,8 +151,6 @@ viandesData.sousCategories.forEach(sousCat => {
           )
         }));
       const vrac = new Brand({
-        bLabel: "Vrac",
-        bDescription: "Vrac sans marque",
         formats: (generic.formats || []).map(([lFormat, pPrix, formats = {}]) =>
           new FormatMeat({
             lFormat: lFormat.toString(),
@@ -114,6 +179,7 @@ viandesData.sousCategories.forEach(sousCat => {
 });
 
 
+console.log(boissons_);
 
 export { Product };
 export { boissons };

@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Text, Html } from "@react-three/drei";
-import { boissons } from "../data/Objects.js";
+import { boissons,viandes } from "../data/Objects.js";
 // --- Composant interactif minimal pour un produit boissons ---
 
 // Style pour le bouton panier 3D

@@ -7,11 +7,7 @@
         "cotes": [
           {
             "brand": null,
-            "images": ["cotes.png"],
-            "formats": [
-              [0.1, 7.0, {"froze": true, "pack": [2,5,10]}],
-              [1, 75.0, {"raw": {"quality": "low"}, "type": "haché"}]
-            ]
+            "images": ["cotes.png"]
           },
           {
             "brand": "Charal",
@@ -35,8 +31,7 @@
         "filet": [
           {
             "brand": null,
-            "images": ["filet.png"],
-            "description": "Le meilleur morceau du boeuf"
+            "images": ["filet.png"]
           },
           {
             "brand": "Charal",
@@ -63,12 +58,7 @@
         "poitrine": [
           {
             "brand": null,
-            "images": ["poitrine_poulet.png"],
-            "description": "le blanc p)ar excellence",
-            "formats": [
-              [0.150, 3.0, {"froze": false}],
-              [0.300, 5.5, {"raw": {"quality": "standard"}}]
-            ]
+            "images": ["poitrine_poulet.png"]
           },
           {
             "brand": "Le Gaulois",
@@ -95,12 +85,7 @@
         "cuisse": [
           {
             "brand": null,
-            "images": ["jambon_blanc.png"],
-            "description": "Jambon blanc supérieur, découenné, dégraissé.",
-            "formats": [
-              [0.100, 1.5, {"froze": false}],
-              [0.200, 2.8, {"raw": {"quality": "standard"}}]
-            ]
+            "images": ["jambon_blanc.png"]
           },
           {
             "brand": "Fleury Michon",
