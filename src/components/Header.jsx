@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import "./Header.scss";
-import { boissons} from "../data/Objects.js";
+import { boissons,viandes } from "../data/Objects.js";
 
 
 export default function Header({ onCartClick, cartQty }) {
@@ -14,6 +14,7 @@ export default function Header({ onCartClick, cartQty }) {
     }
   }, [cartQty]);
   console.log(boissons);
+  console.log(viandes);
   
   // Boissons.logBrandsIfLabel(Vodka)
   // Vodka.brands[0].setQteToFormat(".33",1)

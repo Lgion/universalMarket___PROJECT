@@ -1,4 +1,4 @@
-import {Dispo, FormatBottle, Brand, Product, MeatProduct} from "./Classes.js"
+import {Dispo, FormatBottle, FormatMeat, Brand, Product, MeatProduct} from "./Classes.js"
 
 
 import boissonsData from './categories/boissons.json';
@@ -20,12 +20,12 @@ boissonsData.sousCategories.forEach(sousCat => {
     Object.entries(sousCat.produits).forEach(([boissonKey, brandsArr]) => {
       boissons[sousCatKey][boissonKey] = new Product({
         label: boissonKey.charAt(0).toUpperCase() + boissonKey.slice(1),
-// brand==null {
+// brand===null {
   images: (!brandsArr[0].brand)?brandsArr[0].images:[],
   description: (!brandsArr[0].brand)?brandsArr[0].description:"",
 // }
         brands: brandsArr
-// brand==null {
+// brand!==null {
   .filter(brandData => brandData.brand)
 // }
           .map(brandData =>
@@ -48,37 +48,71 @@ boissonsData.sousCategories.forEach(sousCat => {
 
 
 viandesData.sousCategories.forEach(sousCat => {
+  // Normalisation du nom de la sous-catégorie
   const sousCatKey = sousCat.nom
     .toLowerCase()
     .normalize("NFD").replace(/\p{Diacritic}/gu, "")
     .replace(/\s+/g, "-");
+
   if (sousCat.produits && typeof sousCat.produits === 'object') {
     viandes[sousCatKey] = {};
+
     Object.entries(sousCat.produits).forEach(([viandeKey, variantsArr]) => {
-      // On prend la première entrée comme base
-      const base = variantsArr[0];
+      // Cherche l'entrée générique (brand:null)
+      const generic = variantsArr.find(v => v.brand === null) || {};
+      // Récupère images/description du générique, sinon fallback sur la première entrée
+      const images = generic.images || (variantsArr[0] && variantsArr[0].images) || [];
+      const description = generic.description || (variantsArr[0] && variantsArr[0].description) || "";
+
+      // Génère les brands (marques ou vrac ou générique)
+      const brands = variantsArr
+        .filter(variant => variant.brand !== null)
+        .map(variant => new Brand({
+          bLabel: variant.brand === false ? "Vrac" : variant.brand,
+          bDescription: variant.description || "",
+          formats: (variant.formats || []).map(([lFormat, pPrix, formats = {}]) =>
+            new FormatMeat({
+              lFormat: lFormat.toString(),
+              pPrix,
+              pack: formats.pack || null,
+              travail: formats.travail || null,
+              grill: formats.grill || null,
+              raw: formats.raw || null,
+              froze: formats.froze || false,
+              dispo: new Dispo({}) // à adapter si tu veux gérer la dispo
+            })
+          )
+        }));
+      const vrac = new Brand({
+        bLabel: "Vrac",
+        bDescription: "Vrac sans marque",
+        formats: (generic.formats || []).map(([lFormat, pPrix, formats = {}]) =>
+          new FormatMeat({
+            lFormat: lFormat.toString(),
+            pPrix,
+            pack: formats.pack || null,
+            travail: formats.travail || null,
+            grill: formats.grill || null,
+            raw: formats.raw || null,
+            froze: formats.froze || false,
+            dispo: new Dispo({}) // à adapter si tu veux gérer la dispo
+          })
+        )
+      });
+
+
       viandes[sousCatKey][viandeKey] = new MeatProduct({
         label: viandeKey.charAt(0).toUpperCase() + viandeKey.slice(1).replace(/-/g, ' '),
-        description: base.description || "",
-        images: base.images || [],
-        brands: [], // À enrichir si besoin
-        details: {
-          origine: base.origine || null,
-          labelsQualite: base.labelsQualite || [],
-          decoupe: base.decoupe || null,
-          conservation: base.conservation || null,
-          allergens: base.allergens || []
-        },
-        nutrition: base.nutrition || {},
-        autre: {
-          conseilsCuisson: base.conseilsCuisson || "",
-          ingredients: base.ingredients || [],
-          ecoScore: base.ecoScore || null
-        }
+        images,
+        description,
+        brands,
+        vrac,
+        partie: [sousCatKey, ...Object.keys(sousCat.produits).filter(k => k !== viandeKey)],
       });
     });
   }
 });
+
 
 
 export { Product };

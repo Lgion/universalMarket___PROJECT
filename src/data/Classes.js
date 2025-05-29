@@ -53,11 +53,11 @@ export class FormatBottle extends Format {
   }
 }
 export class FormatMeat extends Format {
-  constructor({ pack=[1],  type="simple", raw=null,froze=null,grill=null, ...rest }) {
+  constructor({ pack=[1],  travail="simple raw", raw=null,froze=null,grill=null, ...rest }) {
     super(rest)
     this.unit = "Kg";
     this.pack = pack
-    this.type = type
+    this.travail = travail
     this.grill = grill?new Grill(grill):grill
     this.raw = raw?new Raw(raw):raw
     this.froze = froze===undefined?froze:true
@@ -118,8 +118,10 @@ export class MeatProduct extends Product {
     ...rest
   }) {
     super(rest);
-    this.partie = PARTIE_MEAT[this.partie[0]]
-                    .findIndex(p=>p===this.partie[1])===-1 ? null : this.partie[1]
+    console.log(this);
+    
+    // this.partie = PARTIE_MEAT[this.partie[0]]
+    //                 .findIndex(p=>p===this.partie[1])===-1 ? null : this.partie[1]
     this.details = new Details(details);
     this.nutrition = new Nutrition(nutrition);
     this.autre = new Autre(autre);

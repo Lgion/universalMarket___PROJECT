@@ -51,7 +51,7 @@ export const CoteBoeuf = new MeatProduct({
         pPrix: 75,
         dispo: new Dispo({ qte: 0, zoneID: 78543453 }),
         raw: new Raw({ quality: "low" }),
-        type: "haché",
+        travail: "haché",
       },
     ]),
   ]

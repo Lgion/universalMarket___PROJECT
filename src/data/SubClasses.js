@@ -1,7 +1,9 @@
 
 // --- CLASSES AVANCÉES POUR VIANDES ---
 export const PARTIE_MEAT = {
-    boeuf:["full","epaule","patte","cuisse"]
+    boeuf:["full","epaule","patte","cuisse"],
+    porc:["full","epaule","patte","cuisse"],
+    poulet:["full","epaule","patte","cuisse"]
 }
 export class Raw {
     constructor({ details=null, quality="medium", prepared="none", ...rest } = {}) {
