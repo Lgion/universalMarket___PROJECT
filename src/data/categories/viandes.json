@@ -28,7 +28,7 @@
             "brand": "Charal",
             "description": "Steak haché Charal, 100% muscle, origine France.",
             "formats": [
-              [0.125, 2.9, {"froze": true}],
+              [0.125, 2.9, {"froze": true,"pack": [2,5,10]}],
               [0.250, 5.0, {"raw": {"quality": "premium"}}]
             ]
           },
@@ -36,8 +36,8 @@
             "brand": false,
             "description": "Steak haché vendu en vrac, sans marque.",
             "formats": [
-              [0.125, 2.2, {"froze": true,"pack": [2,5,10]}],
-              [0.250, 4.0, {"raw": {"quality": "standard"},"travail": "haché"}]
+              [2.2, {"froze": true}],
+              [4.0, {"raw": {"quality": "standard"},"travail": "haché"}]
             ]
           }
         ]
@@ -63,8 +63,8 @@
             "brand": false,
             "description": "Escalope de poulet vendue en vrac, sans marque.",
             "formats": [
-              [0.150, 2.8, {"froze": false}],
-              [0.300, 5.0, {"raw": {"quality": "standard"}}]
+              [2.8, {"froze": false}],
+              [5.0, {"raw": {"quality": "standard"}}]
             ]
           }
         ]
@@ -90,8 +90,8 @@
             "brand": false,
             "description": "Jambon blanc vendu en vrac, sans marque.",
             "formats": [
-              [0.100, 1.2, {"froze": false}],
-              [0.200, 2.5, {"raw": {"quality": "standard"}}]
+              [1.2, {"froze": false}],
+              [2.5, {"raw": {"quality": "standard"}}]
             ]
           }
         ]

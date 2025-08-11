@@ -161,10 +161,24 @@ export default function Gondola({ position, color, onClick, label, width = 1, su
 
 
 function BoissonProduct3D({ produit, position, onAddToCart = () => {} }) {
-  const [step, setStep] = useState(0); // 0=produit, 1=marque, 2=format, 3=prix/qty
+  // Regroupe toutes les marques + vrac si présent
+  const allBrands = [
+    ...(produit.brands || []),
+    ...(produit.vrac
+      ? [{
+          bLabel: "Vrac",
+          bDescription: produit.vrac.bDescription || "Vendu au poids, sans emballage.",
+          formats: (produit.vrac.formats || produit.vrac.flat?.() || []),
+          isVrac: true
+        }]
+      : [])
+  ];
+  const [step, setStep] = useState(0); // 0=produit, 1=marque, 2=format/option, 3=qty
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedFormat, setSelectedFormat] = useState(null);
+  const [selectedVracOption, setSelectedVracOption] = useState(null);
   const { rotationY } = useSpring({ rotationY: step * Math.PI / 2 });
+
 
   // Gestion du clic principal
   const handleClick = () => {
@@ -181,35 +195,47 @@ function BoissonProduct3D({ produit, position, onAddToCart = () => {} }) {
       <Html center position={[0,0.45,0]} zIndex={10} occlude={false}>
         <div style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: '0.35em',
-          background: 'rgba(255,255,255,0.92)',
-          borderRadius: '22px',
+          flexDirection: 'row',
+          gap: '0.45em',
+          background: 'rgba(255,255,255,0.96)',
+          borderRadius: '16px',
           boxShadow: '0 2px 12px rgba(60,60,90,0.10)',
-          padding: '0.25em 1.1em',
+          padding: '0.18em 1.1em',
           fontSize: '1em',
           fontWeight: 500,
           minHeight: '2.1em',
-          marginBottom: '0.15em',
+          marginBottom: '0.12em',
         }}>
-          <span className="recap-pill" style={{background: step===0 ? '#1976d2':'#e3f2fd', color: step===0 ? '#fff':'#1976d2', borderRadius: '14px', padding: '0.2em 0.9em', fontWeight: 600}}>
-            {produit.label}
-          </span>
-          {step > 1 && selectedBrand && (
-            <>
-              <span style={{color:'#bdbdbd',fontWeight:700}}>&rarr;</span>
-              <span className="recap-pill" style={{background: step===1 ? '#1976d2':'#e3f2fd', color: step===1 ? '#fff':'#1976d2', borderRadius: '14px', padding: '0.2em 0.9em', fontWeight: 600}}>
-                {selectedBrand.bLabel}
-              </span>
-            </>
-          )}
-          {step > 2 && selectedFormat && (
+          { allBrands.map((brand, idx) => (
+            <button
+              key={brand.bLabel || idx}
+              className={"brand-btn" + (selectedBrand === brand ? " selected" : "")}
+              style={{
+                background: selectedBrand === brand ? (brand.isVrac ? '#8d6e63' : '#1976d2') : (brand.isVrac ? '#fbe9e7' : '#e3f2fd'),
+                color: selectedBrand === brand ? '#fff' : (brand.isVrac ? '#4e342e' : '#1976d2'),
+                border: 'none',
+                borderRadius: '14px',
+                padding: '0.2em 0.9em',
+                fontWeight: 600,
+                cursor: 'pointer',
+                outline: 'none',
+                transition: 'background 0.18s, color 0.18s',
+              }}
+              title={brand.bDescription || ''}
+              onClick={() => { setSelectedBrand(brand); setStep(2); }}
+            >
+              {brand.bLabel}
+            </button>
+          )) }
+          {selectedFormat && (
             <>
               <span style={{color:'#bdbdbd',fontWeight:700}}>&rarr;</span>
               <span className="recap-pill" style={{background: step===2 ? '#1976d2':'#e3f2fd', color: step===2 ? '#fff':'#1976d2', borderRadius: '14px', padding: '0.2em 0.9em', fontWeight: 600}}>
                 {selectedFormat.lFormat}L
               </span>
             </>
+          )}
+
           )}
         </div>
       </Html>
@@ -269,31 +295,68 @@ function BoissonProduct3D({ produit, position, onAddToCart = () => {} }) {
       </>
     );
   } else if (step === 2 && selectedBrand) {
-    // Affiche les formats (boutons cliquables, nouvelle étape)
-    display = (
-      <>
-        {selectedBrand.formats.map((format, i) => (
-          <mesh
-            key={format.lFormat}
-            position={[0, 0.25 - i*0.22, 0]}
-            onClick={e => { e.stopPropagation(); setSelectedFormat(format); setStep(3); }}
-            castShadow
-          >
-            <boxGeometry args={[0.35, 0.16, 0.18]} />
-            <meshStandardMaterial color="#ffe0b2" />
+    // Cas spécial : si marque "Vrac", on affiche les options (congelé, haché, etc.)
+    if (selectedBrand.isVrac) {
+      // Récupère toutes les options uniques présentes dans les formats vrac
+      const vracOptions = Array.from(
+        new Set(
+          selectedBrand.formats.flatMap(fmt => Object.keys(fmt).filter(k => typeof fmt[k] === 'object' || typeof fmt[k] === 'string'))
+        )
+      );
+      display = (
+        <>
+          {vracOptions.length === 0 ? (
             <Text position={[0,0,0.1]} fontSize={0.09} color="#bf360c" anchorX="center" anchorY="middle">
-              {format.lFormat}
+              Pas d'option vrac disponible
             </Text>
-          </mesh>
-        ))}
-        <Html center position={[0,-0.45,0]}>
-          <button className="btn-retour-3d" onClick={e => { e.stopPropagation(); setStep(1); setSelectedFormat(null); }}>
-            ← Retour
-          </button>
-        </Html>
-      </>
-    );
-  } else if (step === 3 && selectedBrand && selectedFormat) {
+          ) : vracOptions.map((opt, i) => (
+            <mesh
+              key={opt}
+              position={[0, 0.25 - i*0.22, 0]}
+              onClick={e => { e.stopPropagation(); setSelectedVracOption(opt); setStep(3); }}
+              castShadow
+            >
+              <boxGeometry args={[0.35, 0.16, 0.18]} />
+              <meshStandardMaterial color="#ffe0b2" />
+              <Text position={[0,0,0.1]} fontSize={0.09} color="#bf360c" anchorX="center" anchorY="middle">
+                {opt.charAt(0).toUpperCase() + opt.slice(1)}
+              </Text>
+            </mesh>
+          ))}
+          <Html center position={[0,-0.45,0]}>
+            <button className="btn-retour-3d" onClick={e => { e.stopPropagation(); setStep(1); setSelectedVracOption(null); }}>
+              ← Retour
+            </button>
+          </Html>
+        </>
+      );
+    } else {
+      // Affiche les formats (boutons cliquables, nouvelle étape)
+      display = (
+        <>
+          {selectedBrand.formats.map((format, i) => (
+            <mesh
+              key={format.lFormat}
+              position={[0, 0.25 - i*0.22, 0]}
+              onClick={e => { e.stopPropagation(); setSelectedFormat(format); setStep(3); }}
+              castShadow
+            >
+              <boxGeometry args={[0.35, 0.16, 0.18]} />
+              <meshStandardMaterial color="#ffe0b2" />
+              <Text position={[0,0,0.1]} fontSize={0.09} color="#bf360c" anchorX="center" anchorY="middle">
+                {format.lFormat}
+              </Text>
+            </mesh>
+          ))}
+          <Html center position={[0,-0.45,0]}>
+            <button className="btn-retour-3d" onClick={e => { e.stopPropagation(); setStep(1); setSelectedFormat(null); }}>
+              ← Retour
+            </button>
+          </Html>
+        </>
+      );
+    }
+  } else if (step === 3 && selectedBrand && (selectedFormat || (selectedBrand.isVrac && selectedVracOption))) {
     // Affiche le prix, input quantité et bouton panier pour le format sélectionné
     display = (
       <mesh position={[0, 0, 0]} castShadow>

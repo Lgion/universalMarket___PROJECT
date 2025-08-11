@@ -116,6 +116,7 @@ export class ProductVrac extends Product {
   }) {
     super(rest);
     this.vrac = vrac;
+    // this.vrac = new Format(vrac);
   }
 }
 export class MeatProduct extends ProductVrac {
